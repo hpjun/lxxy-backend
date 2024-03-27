@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yhp.lxxybackend.mapper.ActivityMapper">
+
+    <resultMap id="BaseResultMap" type="com.yhp.lxxybackend.model.entity.Activity">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="profile" column="profile" jdbcType="VARCHAR"/>
+            <result property="level" column="level" jdbcType="TINYINT"/>
+            <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
+            <result property="venue" column="venue" jdbcType="VARCHAR"/>
+            <result property="distance" column="distance" jdbcType="INTEGER"/>
+            <result property="totalCount" column="total_count" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="startTime" column="start_time" jdbcType="TIMESTAMP"/>
+            <result property="endTime" column="end_time" jdbcType="TIMESTAMP"/>
+            <result property="contact" column="contact" jdbcType="VARCHAR"/>
+            <result property="status" column="status" jdbcType="VARCHAR"/>
+            <result property="isTop" column="is_top" jdbcType="TINYINT"/>
+            <result property="username" column="username" jdbcType="VARCHAR"/>
+            <result property="userAvatar" column="user_avatar" jdbcType="VARCHAR"/>
+            <result property="isShow" column="is_show" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,create_time,update_time,
+        is_delete,title,profile,
+        level,pic_url,venue,
+        distance,total_count,user_id,
+        start_time,end_time,contact,
+        status,is_top,username,
+        user_avatar,is_show
+    </sql>
+</mapper>

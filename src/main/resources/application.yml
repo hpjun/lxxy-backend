@@ -1,0 +1,76 @@
+# 公共配置文件
+spring:
+  application:
+    name: lxxy
+  # 默认 dev 环境
+  profiles:
+    active: dev
+  # 数据库配置
+  datasource:
+    driver-class-name: ${lxxy.datasource.driver-class-name}
+    url: ${lxxy.datasource.url}
+    username: ${lxxy.datasource.username}
+    password: ${lxxy.datasource.password}
+  # Redis 配置
+  redis:
+    database: ${lxxy.redis.database}
+    host: ${lxxy.redis.host}
+    port: ${lxxy.redis.port}
+    timeout: ${lxxy.redis.timeout}
+    password: ${lxxy.redis.password}
+    lettuce:
+      pool:
+        max-active: 10
+        max-idle: 10
+        min-idle: 1
+        time-between-eviction-runs: 10s
+  # 文件上传
+  servlet:
+    multipart:
+      # 大小限制
+      max-file-size: 5MB
+      max-request-size: 10MB
+server:
+  address: 0.0.0.0
+  port: 8080
+  servlet:
+    # cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+
+
+lxxy:
+# 对象存储
+  alioss:
+    endpoint: ${lxxy.alioss.endpoint}
+    access-key-id: ${lxxy.alioss.access-key-secret}
+    access-key-secret: ${lxxy.alioss.access-key-secret}
+    bucket-name: ${lxxy.alioss.bucket-name}
+
+# 接口文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: "lxxy接口文档"
+    version: 1.0
+    group:
+      user:
+        group-name: 用户端接口
+        api-rule: package
+        api-rule-resources:
+          - com.yhp.lxxybackend.controller.user
+      admin:
+        group-name: 管理端接口
+        api-rule: package
+        api-rule-resources:
+          - com.yhp.lxxybackend.controller.admin
