@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 
 import com.yhp.lxxybackend.model.dto.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,5 +54,12 @@ public class CommonController {
         }
 
         return Result.fail(MessageConstant.UPLOAD_FAILED);
+    }
+
+    @PostMapping("/code/{phone}")
+    @ApiOperation("发送验证码")
+    public Result sendCode(@PathVariable(required = false, value = "phone") String phone) {
+        // TODO 发送验证码，手机号可有可无，但是手机号没有的话就要校验登录状态
+        return Result.ok("发送验证码" + phone);
     }
 }
