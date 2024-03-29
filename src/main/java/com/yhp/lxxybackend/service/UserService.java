@@ -1,5 +1,7 @@
 package com.yhp.lxxybackend.service;
 
+import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.dto.UserFormDTO;
 import com.yhp.lxxybackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -10,4 +12,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UserService extends IService<User> {
 
+    Result register(UserFormDTO userFormDTO);
+
+    Result login(UserFormDTO userFormDTO,String role);
 }

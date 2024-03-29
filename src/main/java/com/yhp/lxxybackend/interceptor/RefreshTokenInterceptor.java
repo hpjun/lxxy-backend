@@ -43,11 +43,10 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         }
         // Redis中的字段需要与LoginUserDTO的字段一致，username,id,avatar,role
         LoginUserDTO loginUserDTO = BeanUtil.fillBeanWithMap(userMap, new LoginUserDTO(), false);
-        loginUserDTO.setToken(token);
         // 存在，保存到ThreadLocal
         UserHolder.saveUser(loginUserDTO);
         // 刷新token有效期
-        stringRedisTemplate.expire(RedisConstants.LOGIN_USER_KEY + token,RedisConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);
+        stringRedisTemplate.expire(RedisConstants.LOGIN_USER_KEY + token,RedisConstants.LOGIN_USER_TTL, TimeUnit.DAYS);
         // 放行
         return true;
     }

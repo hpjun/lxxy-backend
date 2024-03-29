@@ -7,6 +7,7 @@ import com.yhp.lxxybackend.model.dto.PostDTO;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
+import com.yhp.lxxybackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.models.auth.In;
@@ -14,24 +15,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+
 @RestController("userUserController")
 @RequestMapping("/user/user")
 @Api(tags = "C端-用户管理接口")
 @Slf4j
 public class UserController {
 
+    @Resource
+    UserService userService;
+
     @PostMapping("/login")
     @ApiOperation("登录功能")
     public Result login(@RequestBody UserFormDTO userFormDTO){
-        // TODO 用户登录
-        return Result.ok("用户登录"+userFormDTO);
+        return userService.login(userFormDTO,"user");
     }
 
     @PostMapping("/register")
     @ApiOperation("注册功能")
     public Result register(@RequestBody UserFormDTO userFormDTO){
-        // TODO 注册功能
-        return Result.ok("注册功能"+userFormDTO);
+        return userService.register(userFormDTO);
     }
 
     @GetMapping("/user-info")

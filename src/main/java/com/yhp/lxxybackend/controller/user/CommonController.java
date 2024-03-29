@@ -1,21 +1,27 @@
 package com.yhp.lxxybackend.controller.user;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.yhp.lxxybackend.constant.MessageConstant;
 import com.yhp.lxxybackend.constant.UploadTypeConstant;
+import com.yhp.lxxybackend.model.dto.LoginUserDTO;
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.service.UserService;
 import com.yhp.lxxybackend.utils.AliOssUtil;
+import com.yhp.lxxybackend.utils.RegexUtils;
+import com.yhp.lxxybackend.utils.UserHolder;
+import com.yhp.lxxybackend.constant.RedisConstants;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yhp
@@ -30,12 +36,44 @@ public class CommonController {
 
     @Resource
     AliOssUtil aliOssUtil;
+    @Resource
+    UserService userService;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
 
     @PostMapping("/code/{phone}")
     @ApiOperation("发送验证码")
     public Result sendCode(@PathVariable(required = false, value = "phone") String phone) {
-        // TODO 发送验证码，手机号可有可无，但是手机号没有的话就要校验登录状态
-        return Result.ok("发送验证码" + phone);
+        if(StrUtil.isBlank(phone)){
+            // 没有手机号，获取当前登录的手机号
+            LoginUserDTO user = UserHolder.getUser();
+            if(user == null){
+                // 没有登录，不能调用这个接口
+                return Result.fail("未登录，不能调用此接口");
+            }
+            // 获得当前登录用户的手机号
+            phone = userService.getById(user.getId()).getPhone();
+        }
+        // 校验手机号
+        if (RegexUtils.isPhoneInvalid(phone)) {
+            // 如果不符合，返回错误信息
+            return Result.fail("手机号格式错误！");
+        }
+
+        // 检查Redis中是否有验证码
+        String s = stringRedisTemplate.opsForValue().get(RedisConstants.LOGIN_CODE_KEY + phone);
+        if(StrUtil.isBlank(s)){
+            return Result.ok("已发送验证码");
+        }
+
+        // 符合，生成验证码
+        String code = RandomUtil.randomNumbers(6);
+        // 保存验证码到Redis
+        stringRedisTemplate.opsForValue().set(RedisConstants.LOGIN_CODE_KEY + phone, code, RedisConstants.LOGIN_CODE_TTL, TimeUnit.MINUTES);
+        // 发送验证码
+        log.debug("发送短信验证码成功：{}",code);
+
+        return Result.ok("已发送验证码");
     }
 
     @PostMapping("/upload")

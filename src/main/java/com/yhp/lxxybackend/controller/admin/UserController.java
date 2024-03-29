@@ -3,12 +3,13 @@ package com.yhp.lxxybackend.controller.admin;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
+import com.yhp.lxxybackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -22,11 +23,13 @@ import java.util.List;
 @Slf4j
 public class UserController {
 
+    @Resource
+    UserService userService;
+
     @PostMapping("/login")
     @ApiOperation("登录")
     public Result login(@RequestBody UserFormDTO userFormDTO){
-        // TODO 管理员登录
-        return Result.ok("管理员登录+token"+userFormDTO);
+        return userService.login(userFormDTO,"admin");
     }
 
     @PutMapping("/update-pwd")
