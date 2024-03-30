@@ -34,7 +34,7 @@ public class MvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/user/**")
                 .excludePathPatterns(
                         "/user/user/login",
-                        "/user/user/code",
+                        "/user/common/code/*",
                         "/user/activity/all",
                         "/user/post/random/next",
                         "/user/post/latest",

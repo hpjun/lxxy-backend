@@ -3,6 +3,7 @@ package com.yhp.lxxybackend.controller.admin;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
+import com.yhp.lxxybackend.model.vo.UserCardVO;
 import com.yhp.lxxybackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,24 +36,21 @@ public class UserController {
     @PutMapping("/update-pwd")
     @ApiOperation("修改密码")
     public Result updatePwd(@RequestBody UserFormDTO userFormDTO){
-        // TODO 修改密码
-        return Result.ok("修改密码"+userFormDTO);
+        return userService.updatePwd(userFormDTO);
     }
 
     @GetMapping("/logout")
     @ApiOperation("退出登录")
     public Result logout(){
-        // TODO 退出登录
-        return Result.ok("退出登录");
+        return userService.logout();
     }
 
     @GetMapping("/list")
     @ApiOperation("分页查询用户信息")
-    public Result list(@RequestParam Integer pageNum,
-                       @RequestParam String sc,
-                       @RequestParam String ban){
-        // TODO 分页查询用户信息
-        return Result.ok("分页查询用户信息"+pageNum+sc+ban);
+    public Result<List<UserCardVO>> list(@RequestParam Integer pageNum,
+                                         @RequestParam String sc,
+                                         @RequestParam String ban){
+        return userService.listUser(pageNum,sc,ban);
     }
 
     @PutMapping("/{userId}")
@@ -64,7 +62,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    @ApiOperation("查看用户详细信息")
+    @ApiOperation("查看用户详细信息-前端未完成")
     public Result userDetail(@PathVariable("userId") Integer userId){
         // TODO 查看用户详细信息
         return Result.ok("查看用户详细信息"+userId);
@@ -72,17 +70,14 @@ public class UserController {
 
     @DeleteMapping("/delete")
     @ApiOperation("批量删除用户")
-    public Result delete(@RequestParam List<Integer> ids){
-        // TODO 批量删除用户
-        return Result.ok("批量删除用户"+ids);
+    public Result delete(@RequestBody List<Integer> ids){
+        return userService.delete(ids);
     }
 
     @PutMapping("/status/{userId}")
     @ApiOperation("封禁/解封用户")
     public Result changeStatus(@PathVariable("userId") Integer userId){
-        // TODO 封禁/解封用户
-        return Result.ok("封禁/解封用户"+userId);
+        return userService.changeStatus(userId);
     }
-
 
 }

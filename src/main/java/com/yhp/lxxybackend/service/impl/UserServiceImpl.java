@@ -6,6 +6,8 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
@@ -14,15 +16,19 @@ import com.yhp.lxxybackend.model.dto.LoginUserDTO;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
 import com.yhp.lxxybackend.model.entity.User;
+import com.yhp.lxxybackend.model.vo.UserCardVO;
 import com.yhp.lxxybackend.service.UserService;
 import com.yhp.lxxybackend.mapper.UserMapper;
 import com.yhp.lxxybackend.utils.RegexUtils;
+import com.yhp.lxxybackend.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,9 +148,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 return Result.fail(MessageConstant.CODE_FAIL);
             }
         }
+
+        if(users.get(0).getBan() == 1){
+            return Result.fail(MessageConstant.ACCOUNT_LOCKED);
+        }
+
         if("admin".equals(role)){
             if(!(users.get(0).getRole().equals("admin"))){
-                return Result.fail("无权限");
+                return Result.fail(MessageConstant.UN_AUTH);
             }
         }
 
@@ -174,6 +185,122 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         }
         return Result.ok(token);
+    }
+
+    @Override
+    public Result logout() {
+        // 获取当前登录的token信息
+        String token = UserHolder.getUser().getToken();
+        // 在Redis中移除token信息
+        stringRedisTemplate.expire(RedisConstants.LOGIN_USER_KEY+token,0,TimeUnit.SECONDS);
+        return Result.ok();
+    }
+
+    @Override
+    public Result updatePwd(UserFormDTO userFormDTO) {
+        String password = userFormDTO.getPassword();
+        String code = userFormDTO.getCode();
+        // 判断密码和验证码的合法性
+        if(RegexUtils.isPasswordInvalid(password)){
+            return Result.fail(MessageConstant.PASSWORD_FORMAT);
+        }
+        if(RegexUtils.isCodeInvalid(code)){
+            return Result.fail(MessageConstant.CODE_FAIL);
+        }
+        // 获取当前登录的手机号
+        Long userId = UserHolder.getUser().getId();
+        User user = query().eq("id", userId).one();
+        // 校验该手机号的验证码是否正确
+        String realCode = stringRedisTemplate.opsForValue().get(RedisConstants.LOGIN_CODE_KEY + user.getPhone());
+        if(!code.equals(realCode)){
+            return Result.fail(MessageConstant.CODE_FAIL);
+        }
+        // 对用户的新密码进行MD5加密
+        user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        // 更新用户密码信息
+        int update = userMapper.updateById(user);
+        if(update != 0){
+            stringRedisTemplate.expire(RedisConstants.LOGIN_CODE_KEY+user.getPhone(),0,TimeUnit.SECONDS);
+            // 获取当前登录的token信息
+            String token = UserHolder.getUser().getToken();
+            // 在Redis中移除token信息
+            stringRedisTemplate.expire(RedisConstants.LOGIN_USER_KEY+token,0,TimeUnit.SECONDS);
+            return Result.ok("更改成功");
+        }else{
+            return Result.fail("服务器异常");
+        }
+    }
+
+    @Override
+    public Result<List<UserCardVO>> listUser(Integer pageNum, String sc, String ban) {
+        // 根据条件分页查询用户信息
+
+        // 封装查询条件
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        Integer isBan;
+        if("正常".equals(ban)){
+            isBan = 0;
+            userQueryWrapper.eq("ban",isBan);
+        }else if("封禁".equals(ban)){
+            isBan = 1;
+            userQueryWrapper.eq("ban",isBan);
+        }else{
+            // 按照全部查询
+        }
+        if(!StrUtil.isBlank(sc)){
+            userQueryWrapper
+                    .and(qw -> qw
+                            .like("username",sc)
+                            .or().like("phone",sc)
+                            .or().like("id",sc));
+        }
+        // 封装分页对象
+        Page<User> page = new Page<>(pageNum,MessageConstant.ADMIN_PAGE_SIZE);
+        // 分页查询
+        Page<User> userPage = userMapper.selectPage(page, userQueryWrapper);
+        List<User> users = userPage.getRecords();
+        ArrayList<UserCardVO> userCardVOS = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (User user : users) {
+            UserCardVO userCardVO = BeanUtil.copyProperties(user, UserCardVO.class);
+            // 格式化日期
+            userCardVO.setCreateTime(dateFormat.format(user.getCreateTime()));
+            userCardVOS.add(userCardVO);
+        }
+        return Result.ok(userCardVOS,page.getTotal());
+    }
+
+    @Override
+    public Result delete(List<Integer> ids) {
+        // 判断该数组是否为空
+        if(ids.size() == 0){
+            return Result.fail("用户不存在，删除失败");
+        }
+        // TODO 删除之前，用户涉及的相关记录：活动、评论、收藏夹、帖子应该都被抹除
+
+
+        userMapper.deleteBatchIds(ids);
+        return Result.ok("删除成功");
+    }
+
+    @Override
+    public Result changeStatus(Integer userId) {
+        User user = userMapper.selectById(userId);
+        if(user == null){
+            return Result.fail("该用户不存在");
+        }
+        Integer ban = user.getBan();
+        if(ban == 0){
+            // 被ban
+            user.setBan(1);
+            userMapper.updateById(user);
+            return Result.ok(true);
+        }else{
+            // 解封
+            user.setBan(0);
+            userMapper.updateById(user);
+            return Result.ok(false);
+        }
     }
 }
 
