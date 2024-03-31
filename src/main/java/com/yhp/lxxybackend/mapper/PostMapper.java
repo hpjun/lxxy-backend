@@ -2,6 +2,9 @@ package com.yhp.lxxybackend.mapper;
 
 import com.yhp.lxxybackend.model.entity.Post;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.yhp.lxxybackend.model.vo.CategoryData;
+
+import java.util.List;
 
 /**
 * @author Admin
@@ -11,6 +14,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface PostMapper extends BaseMapper<Post> {
 
+    /**
+     * 根据板块查询帖子数量
+     * @return
+     */
+    List<CategoryData> selectCountByType();
 }
 
 

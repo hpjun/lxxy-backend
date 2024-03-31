@@ -32,4 +32,11 @@
         is_top,lc_time,username,
         user_avatar,is_show
     </sql>
+    <select id="selectCountByType" resultType="com.yhp.lxxybackend.model.vo.CategoryData">
+        select pt.type_name as 'name', COUNT(p.id) as 'value'
+        from post p
+        join post_type pt on p.post_type_id = pt.id
+        where p.is_delete = 0
+        group by pt.id
+    </select>
 </mapper>

@@ -1,7 +1,7 @@
 package com.yhp.lxxybackend.controller.admin;
 
 import com.yhp.lxxybackend.model.dto.Result;
-import com.yhp.lxxybackend.model.vo.PVUVData;
+import com.yhp.lxxybackend.model.vo.*;
 import com.yhp.lxxybackend.service.StatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,50 +31,43 @@ public class StatisticsController {
     @GetMapping("/pvuv/{timeSpan}")
     @ApiOperation("获取PV、UV数据")
     public Result<List<PVUVData>> pvuv(@PathVariable("timeSpan") String timeSpan){
-        // TODO 获取PV、UV数据
         return statisticsService.pvuv(timeSpan);
     }
 
     @GetMapping("/user-count/{timeSpan}")
     @ApiOperation("获取用户数量")
-    public Result userCount(@PathVariable("timeSpan") String timeSpan){
-        // TODO 获取用户数量
-        return Result.ok("获取用户数量"+timeSpan);
+    public Result<List<UserData>> getUserCount(@PathVariable("timeSpan") String timeSpan){
+        return statisticsService.getUserCount(timeSpan);
     }
 
     @GetMapping("/activity-count/{timeSpan}")
     @ApiOperation("获取活动数量")
-    public Result activityCount(@PathVariable("timeSpan") String timeSpan){
-        // TODO 获取活动数量
-        return Result.ok("获取活动数量"+timeSpan);
+    public Result<List<ActivityData>> getActivityCount(@PathVariable("timeSpan") String timeSpan){
+        return statisticsService.getActivityCount(timeSpan);
     }
 
     @GetMapping("/post-count/{timeSpan}")
     @ApiOperation("获取帖子数量")
-    public Result postCount(@PathVariable("timeSpan") String timeSpan){
-        // TODO 获取帖子数量
-        return Result.ok("获取帖子数量"+timeSpan);
+    public Result<List<PostData>> getPostCount(@PathVariable("timeSpan") String timeSpan){
+        return statisticsService.getPostCount(timeSpan);
     }
 
     @GetMapping("/post-type-count")
     @ApiOperation("获取不同板块下的帖子数量")
-    public Result postTypeCount(){
-        // TODO 获取不同板块下的帖子数量,指所有板块
-        return Result.ok("获取不同板块下的帖子数量");
+    public Result<List<CategoryData>> postTypeCount(){
+        return statisticsService.postTypeCount();
     }
 
     @GetMapping("/active-user-rate")
     @ApiOperation("获取近7日活跃用户比例")
-    public Result activeUserRate(){
-        // TODO 获取近7日活跃用户比例
-        return Result.ok("获取近7日活跃用户比例");
+    public Result<List<CategoryData>> activeUserRate(){
+        return statisticsService.activeUserRate();
     }
 
     @GetMapping("/activity-level-rate")
     @ApiOperation("获取不同难度下的活动数")
-    public Result activityLevelRate(){
-        // TODO 获取不同难度下的活动数
-        return Result.ok("获取不同难度下的活动数");
+    public Result<List<CategoryData>> activityLevelRate(){
+        return statisticsService.activityLevelRate();
     }
 
     @GetMapping("/activity-join-rate")
@@ -86,9 +79,9 @@ public class StatisticsController {
 
     @GetMapping("/user-region")
     @ApiOperation("获取用户地域分布")
-    public Result userRegion(){
+    public Result<List<UserRegionData>> userRegion(){
         // TODO 获取用户地域分布
-        return Result.ok("获取用户地域分布");
+        return statisticsService.userRegion();
     }
 
 }

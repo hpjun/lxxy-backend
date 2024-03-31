@@ -86,6 +86,7 @@ public class StatisticsTask {
      * 包括：PV、用户数量、活动数量、帖子数量
      */
     @Scheduled(cron = "0 0 0 * * ?")
+//    @Scheduled(cron = "0/5 * * * * ?")
     public void dayTask(){
         // 每天凌晨将这些数据拿到，statistics:day:{pv/userCount/postCount/activityCount}:{2024:3:31}
         String today = BusinessUtils.getToday();

@@ -50,11 +50,11 @@ public class test {
 //        LocalDate now = LocalDate.now();
 //        String format = now.format(DateTimeFormatter.ofPattern("yyyy:MM:dd"));
 //        System.out.println(format);
-//        List<String> past7Days = BusinessUtils.getPast7Days();
+//        List<String> past7Days = BusinessUtils.getPastNDays(7);
 //        System.out.println(past7Days);
 
 
-//        List<String> past7Days = BusinessUtils.getPast7Days();
+//        List<String> past7Days = BusinessUtils.getPastNDays(7);
 //        for (int i = 0; i < 7; i++) {
 //            System.out.println(RedisConstants.UV_KEY+past7Days.get(i));
 //        }
@@ -99,14 +99,14 @@ public class test {
 //        System.out.println(LocalDateTime.now().getHour());
 //        System.out.println(LocalDateTime.now().minusHours(24).getHour());
 
-//        System.out.println(BusinessUtils.getPast7Days());
-//        List<String> past7Days = BusinessUtils.getPast7Days();
+//        System.out.println(BusinessUtils.getPastNDays(7));
+//        List<String> past7Days = BusinessUtils.getPastNDays(7);
 //        Collections.reverse(past7Days);
 //        System.out.println(past7Days);
 //       18 19 20 21 22 23 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
 
-        System.out.println(BusinessUtils.getPast30Days());
-        List<String> past30Days = BusinessUtils.getPast30Days();
+        System.out.println(BusinessUtils.getPastNDays(30));
+        List<String> past30Days = BusinessUtils.getPastNDays(30);
         Collections.reverse(past30Days);
         System.out.println(past30Days);
     }
