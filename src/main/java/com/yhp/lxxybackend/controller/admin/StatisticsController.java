@@ -1,6 +1,8 @@
 package com.yhp.lxxybackend.controller.admin;
 
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.vo.PVUVData;
+import com.yhp.lxxybackend.service.StatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author yhp
@@ -20,11 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class StatisticsController {
 
+    @Resource
+    StatisticsService statisticsService;
+
     @GetMapping("/pvuv/{timeSpan}")
     @ApiOperation("获取PV、UV数据")
-    public Result pvuv(@PathVariable("timeSpan") String timeSpan){
+    public Result<List<PVUVData>> pvuv(@PathVariable("timeSpan") String timeSpan){
         // TODO 获取PV、UV数据
-        return Result.ok("获取PV、UV数据"+timeSpan);
+        return statisticsService.pvuv(timeSpan);
     }
 
     @GetMapping("/user-count/{timeSpan}")

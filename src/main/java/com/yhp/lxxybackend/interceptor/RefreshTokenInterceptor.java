@@ -4,12 +4,16 @@ import cn.hutool.core.bean.BeanUtil;
 import com.github.xiaoymin.knife4j.core.util.StrUtil;
 import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.model.dto.LoginUserDTO;
+import com.yhp.lxxybackend.utils.BusinessUtils;
 import com.yhp.lxxybackend.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +34,10 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 前置拦截器
 //        Object user = request.getSession().getAttribute("user");
+
+
+
+
         String token = request.getHeader("authorization");
         if(StrUtil.isBlank(token)){
             // token为空，表示未登录
@@ -55,5 +63,20 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // 移除用户
         UserHolder.removeUser();
+        // 进行PV统计
+//        String uri = request.getRequestURI();
+//        StringBuffer url = request.getRequestURL();
+//        System.out.println("uri:"+uri+" url:"+url);
+        String today = BusinessUtils.getToday();
+
+        // 总pv
+        stringRedisTemplate.opsForValue().increment(RedisConstants.TOTAL_PV_KEY);
+        // 今日pv
+        if(Boolean.FALSE.equals(stringRedisTemplate.hasKey(RedisConstants.DAY_PV_KEY + today))){
+            stringRedisTemplate.opsForValue().increment(RedisConstants.DAY_PV_KEY+today);
+            stringRedisTemplate.expire(RedisConstants.DAY_PV_KEY+today,RedisConstants.STATISTICS_DAY_TTL,TimeUnit.DAYS);
+        }else{
+            stringRedisTemplate.opsForValue().increment(RedisConstants.DAY_PV_KEY+today);
+        }
     }
 }

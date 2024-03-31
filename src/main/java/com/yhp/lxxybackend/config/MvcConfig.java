@@ -30,7 +30,7 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/admin/user/login",
                         "/admin/common/code/*"
                 ).order(1);
-        registry.addInterceptor(new UserLoginInterceptor())
+        registry.addInterceptor(new UserLoginInterceptor(stringRedisTemplate))
                 .addPathPatterns("/user/**")
                 .excludePathPatterns(
                         "/user/user/login",

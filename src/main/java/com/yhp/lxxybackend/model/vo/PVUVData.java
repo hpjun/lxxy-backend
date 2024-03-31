@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 public class PVUVData {
     private String date;    //2024-3-25 19:57:00这种格式，传到前端，它自己会格式化
-    private Integer PV;    //没小时或每日的PV数据
-    private Integer UV;    //没小时或每日的UV数据
+    private Integer PV;    //每小时或每日的PV数据
+    private Integer UV;    //每小时或每日的UV数据
 
 
     // JS的处理，或者直接截断

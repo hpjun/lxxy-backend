@@ -9,9 +9,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
+import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.mapper.UserMapper;
 import com.yhp.lxxybackend.model.entity.User;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
+import com.yhp.lxxybackend.utils.BusinessUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,9 +21,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.DigestUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @SpringBootTest
 class LxxyBackendApplicationTests {
@@ -39,13 +41,20 @@ class LxxyBackendApplicationTests {
 
     @Test
     void redisTest() {
-        Gson gson = new Gson();
-        User user = userMapper.selectById(1);
-        String s = gson.toJson(user);
-        stringRedisTemplate.opsForValue().set("test", s);
-        String s1 = stringRedisTemplate.opsForValue().get("test");
-        User user1 = gson.fromJson(s1, User.class);
-        System.out.println("拿出的user"+user1);
+//        Gson gson = new Gson();
+//        User user = userMapper.selectById(1);
+//        String s = gson.toJson(user);
+//        stringRedisTemplate.opsForValue().set("test", s);
+//        String s1 = stringRedisTemplate.opsForValue().get("test");
+//        User user1 = gson.fromJson(s1, User.class);
+//        System.out.println("拿出的user"+user1);
+
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime of = LocalDateTime.of(2024, 3, 30, 17, 30);
+        userQueryWrapper.lt("create_time",of);
+        List<User> users = userMapper.selectList(userQueryWrapper);
+        users.forEach(System.out::println);
     }
 
     @Test
@@ -101,12 +110,6 @@ class LxxyBackendApplicationTests {
         }
     }
 
-    @Test
-    void test(){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        System.out.println(dateFormat.format(date));
-    }
 
 
     /**

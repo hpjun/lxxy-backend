@@ -1,6 +1,8 @@
 package com.yhp.lxxybackend.controller.admin;
 
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.vo.HomeVO;
+import com.yhp.lxxybackend.service.StatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * @author yhp
@@ -20,11 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class HomeController {
 
+    @Resource
+    StatisticsService statisticsService;
+
     @GetMapping()
     @ApiOperation("获取主页数据")
-    public Result getHomeData(){
-        // TODO 获取主页数据
-        return Result.ok("获取主页数据HomeVO");
+    public Result<HomeVO> getHomeData(){
+        return statisticsService.getHomeData();
     }
 
     @GetMapping("/is-login")
