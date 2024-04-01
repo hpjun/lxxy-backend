@@ -3,9 +3,13 @@ package com.yhp.lxxybackend.config;
 import com.yhp.lxxybackend.interceptor.AdminAuthInterceptor;
 import com.yhp.lxxybackend.interceptor.RefreshTokenInterceptor;
 import com.yhp.lxxybackend.interceptor.UserLoginInterceptor;
+import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.lionsoul.ip2region.xdb.Searcher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -14,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 @Configuration
 @Slf4j
@@ -68,4 +73,12 @@ public class MvcConfig implements WebMvcConfigurer {
         configSource.registerCorsConfiguration("/**", config);
         return new CorsFilter(configSource);
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public Ip2RegionUtils getSearcher(){
+        log.info("开始创建ip2RegionUtils对象");
+        return new Ip2RegionUtils();
+    }
+
 }

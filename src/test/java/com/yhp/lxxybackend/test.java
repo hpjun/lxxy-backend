@@ -2,8 +2,13 @@ package com.yhp.lxxybackend;
 
 import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.utils.BusinessUtils;
+import net.coobird.thumbnailator.Thumbnails;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -105,9 +110,17 @@ public class test {
 //        System.out.println(past7Days);
 //       18 19 20 21 22 23 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
 
-        System.out.println(BusinessUtils.getPastNDays(30));
-        List<String> past30Days = BusinessUtils.getPastNDays(30);
-        Collections.reverse(past30Days);
-        System.out.println(past30Days);
+//        System.out.println(BusinessUtils.getPastNDays(30));
+//        List<String> past30Days = BusinessUtils.getPastNDays(30);
+//        Collections.reverse(past30Days);
+//        System.out.println(past30Days);
+
+//        String context = "kjashfjk你好...ah";
+//        System.out.println(context.length());
+
+//        byte[] bytes = compressImage(file);
+//        System.out.println(bytes.length);
+        System.out.println(UUID.randomUUID()+".png");
     }
+
 }

@@ -57,7 +57,7 @@ public class UserController {
     @ApiOperation("修改用户信息-前端未完成")
     public Result edit(@PathVariable("userId") Integer userId,
                        @RequestBody UserDTO userDTO){
-        // TODO 修改用户信息
+        // TODO 修改用户信息,如果修改的是用户名这种信息就要同步到其它地方，比如帖子、活动的冗余字段
         return Result.ok("修改用户信息"+userId+userDTO);
     }
 

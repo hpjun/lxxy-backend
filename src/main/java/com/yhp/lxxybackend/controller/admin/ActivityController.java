@@ -31,7 +31,7 @@ public class ActivityController {
 
     @DeleteMapping("/delete")
     @ApiOperation("批量删除活动")
-    public Result delete(@RequestParam List<Integer> ids){
+    public Result delete(@RequestBody List<Integer> ids){
         // TODO 批量删除活动
         return Result.ok("批量删除活动"+ids);
     }

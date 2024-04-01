@@ -35,7 +35,7 @@ public class CommentController {
     @ApiOperation("发布帖子评论")
     public Result writeComment(@PathVariable("postId") Integer postId,
                                @RequestBody CommentDTO commentDTO){
-        // TODO 发布帖子评论
+        // TODO 发布帖子评论，需要将该帖子的lc_time更新一下
         return Result.ok("发布帖子评论"+postId+commentDTO);
     }
 

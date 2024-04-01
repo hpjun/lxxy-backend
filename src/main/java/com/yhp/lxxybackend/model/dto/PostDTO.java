@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 public class PostDTO {
-    private Integer postType;                //帖子板块
+    private String postType;                //帖子板块
     private String title;                        //帖子标题
     private String content;                    //帖子内容
     private List<String> picUrlList;    //帖子图片地址列表

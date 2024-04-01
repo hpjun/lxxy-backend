@@ -14,6 +14,13 @@ public class MessageConstant {
     public static final String SERVER_ERROR = "服务器错误";
 
 
+
+    public static final String POST_TYPE_NO_EXIST_OR_BAN = "该板块不存在或已被禁用";
+    public static final String TITLE_TOO_LONG = "该板块不存在或已被禁用";
+    public static final String CONTENT_TOO_LONG = "内容太长了";
+    public static final String PIC_LIMIT = "图片数量不超过8张";
+
+
     // 用户和管理员每页数据数量
     public static final Integer USER_PAGE_SIZE = 5;
     public static final Integer ADMIN_PAGE_SIZE = 10;

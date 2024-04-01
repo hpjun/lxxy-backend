@@ -18,7 +18,9 @@ import com.yhp.lxxybackend.model.vo.CategoryData;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
 import com.yhp.lxxybackend.model.vo.UserRegionData;
 import com.yhp.lxxybackend.utils.BusinessUtils;
+import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import org.junit.jupiter.api.Test;
+import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -39,6 +41,8 @@ class LxxyBackendApplicationTests {
    ActivityMapper activityMapper;
    @Resource
    ActivityMemberMapper activityMemberMapper;
+   @Resource
+   Ip2RegionUtils ip2RegionUtils;
 
    @Resource
    StringRedisTemplate stringRedisTemplate;
@@ -87,19 +91,28 @@ class LxxyBackendApplicationTests {
 
 
         // 统计活动参加率
-        ArrayList<CategoryData> categoryDataList = new ArrayList<>();
-        Integer totalCount = activityMapper.selectTotalCount();
-        Long joinCount = activityMemberMapper.selectCount(null);
-        CategoryData joinData = new CategoryData();
-        CategoryData nullData = new CategoryData();
-        joinData.setName("参加人数");
-        joinData.setValue(Math.toIntExact(joinCount));
-        nullData.setName("空缺人数");
-        nullData.setValue((int) (totalCount-joinCount));
-        categoryDataList.add(joinData);
-        categoryDataList.add(nullData);
-        String activityJoinRate = new Gson().toJson(categoryDataList);
-        stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
+//        ArrayList<CategoryData> categoryDataList = new ArrayList<>();
+//        Integer totalCount = activityMapper.selectTotalCount();
+//        Long joinCount = activityMemberMapper.selectCount(null);
+//        CategoryData joinData = new CategoryData();
+//        CategoryData nullData = new CategoryData();
+//        joinData.setName("参加人数");
+//        joinData.setValue(Math.toIntExact(joinCount));
+//        nullData.setName("空缺人数");
+//        nullData.setValue((int) (totalCount-joinCount));
+//        categoryDataList.add(joinData);
+//        categoryDataList.add(nullData);
+//        String activityJoinRate = new Gson().toJson(categoryDataList);
+//        stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
+
+        Searcher searcher = ip2RegionUtils.getSearcher();
+        String ip = "223.104.151.72";
+        try {
+            String region = searcher.search(ip);
+            System.out.println(region);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

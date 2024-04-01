@@ -24,10 +24,19 @@ public class PostTypeController {
         return Result.ok("分页获取板块信息"+pageNum);
     }
 
+
+    @GetMapping("/all")
+    @ApiOperation("查询所有板块信息")
+    public Result all(){
+        // TODO 查询所有板块信息
+        return Result.ok("查询所有板块信息");
+    }
+
+
     @PostMapping()
     @ApiOperation("新增板块信息")
     public Result add(@RequestParam String typeName){
-        // TODO 新增板块信息
+        // TODO 新增板块信息,查询板块名称是否冲突
         return Result.ok("新增板块信息"+typeName);
     }
 
@@ -35,7 +44,7 @@ public class PostTypeController {
     @ApiOperation("修改板块信息")
     public Result edit(@PathVariable("postTypeId") Integer postTypeId,
                        @RequestParam String typeName){
-        // TODO 修改板块信息
+        // TODO 修改板块信息，查询修改的名称是否和已有的冲突
         return Result.ok("修改板块信息"+postTypeId+typeName);
     }
 

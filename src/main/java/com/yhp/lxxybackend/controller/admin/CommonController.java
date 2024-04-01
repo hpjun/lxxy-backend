@@ -1,9 +1,6 @@
 package com.yhp.lxxybackend.controller.admin;
 
-import com.yhp.lxxybackend.constant.MessageConstant;
-import com.yhp.lxxybackend.constant.UploadTypeConstant;
 import com.yhp.lxxybackend.service.CommonService;
-import com.yhp.lxxybackend.utils.AliOssUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -17,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.UUID;
 
 @RestController("adminCommonController")
 @RequestMapping("/admin/common")

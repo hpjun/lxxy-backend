@@ -28,7 +28,7 @@ spring:
   servlet:
     multipart:
       # 大小限制
-      max-file-size: 5MB
+      max-file-size: 8MB
       max-request-size: 10MB
 server:
   address: 0.0.0.0
