@@ -1,13 +1,17 @@
 package com.yhp.lxxybackend.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.Gson;
 import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.mapper.ActivityMapper;
+import com.yhp.lxxybackend.mapper.ActivityMemberMapper;
 import com.yhp.lxxybackend.mapper.PostMapper;
 import com.yhp.lxxybackend.mapper.UserMapper;
 import com.yhp.lxxybackend.model.entity.Activity;
 import com.yhp.lxxybackend.model.entity.Post;
 import com.yhp.lxxybackend.model.entity.User;
+import com.yhp.lxxybackend.model.vo.CategoryData;
+import com.yhp.lxxybackend.model.vo.UserRegionData;
 import com.yhp.lxxybackend.utils.BusinessUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,6 +22,10 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,10 +45,9 @@ public class StatisticsTask {
     PostMapper postMapper;
     @Resource
     ActivityMapper activityMapper;
+    @Resource
+    ActivityMemberMapper activityMemberMapper;
 
-    QueryWrapper<User> userQueryWrapper = new QueryWrapper<User>().eq("is_delete",0);
-    QueryWrapper<Post> postQueryWrapper = new QueryWrapper<Post>().eq("is_delete",0);
-    QueryWrapper<Activity> activityQueryWrapper = new QueryWrapper<Activity>().eq("is_delete",0);
 
 
     /**
@@ -57,9 +64,9 @@ public class StatisticsTask {
         // 将总记录数塞入当前list中，同时删除右边数据
 
         String pv = stringRedisTemplate.opsForValue().get(RedisConstants.TOTAL_PV_KEY);
-        Long userCount = userMapper.selectCount(userQueryWrapper);
-        Long postCount = postMapper.selectCount(postQueryWrapper);
-        Long activityCount = activityMapper.selectCount(activityQueryWrapper);
+        Long userCount = userMapper.selectCount(null);
+        Long postCount = postMapper.selectCount(null);
+        Long activityCount = activityMapper.selectCount(null);
 
 
         stringRedisTemplate.opsForList().leftPush(RedisConstants.HOUR_PV_KEY,pv);
@@ -91,13 +98,47 @@ public class StatisticsTask {
         // 每天凌晨将这些数据拿到，statistics:day:{pv/userCount/postCount/activityCount}:{2024:3:31}
         String today = BusinessUtils.getToday();
 
-        Long userCount = userMapper.selectCount(userQueryWrapper);
-        Long postCount = postMapper.selectCount(postQueryWrapper);
-        Long activityCount = activityMapper.selectCount(activityQueryWrapper);
+        Long userCount = userMapper.selectCount(null);
+        Long postCount = postMapper.selectCount(null);
+        Long activityCount = activityMapper.selectCount(null);
 
         stringRedisTemplate.opsForValue().set(RedisConstants.DAY_USER_KEY+today,String.valueOf(userCount),RedisConstants.STATISTICS_DAY_TTL,TimeUnit.DAYS);
         stringRedisTemplate.opsForValue().set(RedisConstants.DAY_ACTIVITY_KEY+today,String.valueOf(activityCount),RedisConstants.STATISTICS_DAY_TTL,TimeUnit.DAYS);
         stringRedisTemplate.opsForValue().set(RedisConstants.DAY_POST_KEY+today,String.valueOf(postCount),RedisConstants.STATISTICS_DAY_TTL,TimeUnit.DAYS);
 
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper
+                .select("address","count(id) as value").
+                groupBy("address")
+                .orderByDesc("value");
+        ArrayList<UserRegionData> userRegionDataList = new ArrayList<>();
+        // 统计用户地域分布
+        List<Map<String, Object>> maps = userMapper.selectMaps(userQueryWrapper);
+        List<Map<String, Object>> maps1 = maps.subList(0, 10);
+        for (Map<String, Object> map : maps1) {
+            String address = (String) map.get("address");
+            Long value = (Long) map.get("value");
+            UserRegionData userRegionData = new UserRegionData();
+            userRegionData.setRegion(address);
+            userRegionData.setValue(Math.toIntExact(value));
+            userRegionDataList.add(userRegionData);
+        }
+        String userRegion = new Gson().toJson(userRegionDataList);
+        stringRedisTemplate.opsForValue().set(RedisConstants.USER_REGION_KEY,userRegion);
+
+        // 统计活动参加率
+        ArrayList<CategoryData> categoryDataList = new ArrayList<>();
+        Integer totalCount = activityMapper.selectTotalCount();
+        Long joinCount = activityMemberMapper.selectCount(null);
+        CategoryData joinData = new CategoryData();
+        CategoryData nullData = new CategoryData();
+        joinData.setName("参加人数");
+        joinData.setValue(Math.toIntExact(joinCount));
+        nullData.setName("空缺人数");
+        nullData.setValue((int) (totalCount-joinCount));
+        categoryDataList.add(joinData);
+        categoryDataList.add(nullData);
+        String activityJoinRate = new Gson().toJson(categoryDataList);
+        stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
     }
 }

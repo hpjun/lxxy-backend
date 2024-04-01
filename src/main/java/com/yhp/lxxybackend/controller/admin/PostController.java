@@ -33,7 +33,7 @@ public class PostController {
     @DeleteMapping("/delete")
     @ApiOperation("批量删除帖子")
     public Result delete(@RequestParam List<Integer> ids){
-        // TODO 批量删除帖子
+        // TODO 批量删除帖子,还要删除评论信息
         return Result.ok("批量删除帖子"+ids);
     }
 

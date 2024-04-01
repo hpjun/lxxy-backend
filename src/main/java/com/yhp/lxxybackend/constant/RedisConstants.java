@@ -13,6 +13,8 @@ public class RedisConstants {
 
     public static final String TOTAL_UV_KEY = "statistics:total:uv";
     public static final String TOTAL_PV_KEY = "statistics:total:pv";
+    public static final String USER_REGION_KEY = "statistics:userRegion";
+    public static final String ACTIVITY_JOIN_RATE = "statistics:activityJoinRate";
 
 
     public static final String DAY_UV_KEY = "statistics:day:uv:";

@@ -39,7 +39,7 @@ public class ActivityController {
     @PostMapping()
     @ApiOperation("创建活动")
     public Result createActivity(@RequestBody ActivityDTO activityDTO){
-        // TODO 创建活动
+        // TODO 创建活动，创建的时候自己也要参加该活动
         return Result.ok("创建活动"+activityDTO);
     }
 

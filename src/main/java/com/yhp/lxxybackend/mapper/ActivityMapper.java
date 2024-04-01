@@ -11,6 +11,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface ActivityMapper extends BaseMapper<Activity> {
 
+    /**
+     * 获取所有活动总人数
+     * @return
+     */
+    Integer selectTotalCount();
 }
 
 

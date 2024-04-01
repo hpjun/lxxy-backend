@@ -10,9 +10,13 @@ import com.google.gson.Gson;
 import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
 import com.yhp.lxxybackend.constant.RedisConstants;
+import com.yhp.lxxybackend.mapper.ActivityMapper;
+import com.yhp.lxxybackend.mapper.ActivityMemberMapper;
 import com.yhp.lxxybackend.mapper.UserMapper;
 import com.yhp.lxxybackend.model.entity.User;
+import com.yhp.lxxybackend.model.vo.CategoryData;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
+import com.yhp.lxxybackend.model.vo.UserRegionData;
 import com.yhp.lxxybackend.utils.BusinessUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,10 +33,14 @@ import java.util.*;
 @SpringBootTest
 class LxxyBackendApplicationTests {
 
-   @Autowired
+   @Resource
    UserMapper userMapper;
+   @Resource
+   ActivityMapper activityMapper;
+   @Resource
+   ActivityMemberMapper activityMemberMapper;
 
-   @Autowired
+   @Resource
    StringRedisTemplate stringRedisTemplate;
 
     @Test
@@ -49,12 +58,48 @@ class LxxyBackendApplicationTests {
 //        User user1 = gson.fromJson(s1, User.class);
 //        System.out.println("拿出的user"+user1);
 
-        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        LocalDateTime of = LocalDateTime.of(2024, 3, 30, 17, 30);
-        userQueryWrapper.lt("create_time",of);
-        List<User> users = userMapper.selectList(userQueryWrapper);
-        users.forEach(System.out::println);
+//        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+//        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+//        LocalDateTime of = LocalDateTime.of(2024, 3, 30, 17, 30);
+//        userQueryWrapper.lt("create_time",of);
+//        List<User> users = userMapper.selectList(userQueryWrapper);
+//        users.forEach(System.out::println);
+
+//        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+//        userQueryWrapper
+//                .select("address","count(id) as value").
+//                groupBy("address")
+//                .orderByDesc("value");
+//        ArrayList<UserRegionData> userRegionDataList = new ArrayList<>();
+//        // 统计用户地域分布
+//        List<Map<String, Object>> maps = userMapper.selectMaps(userQueryWrapper);
+//        List<Map<String, Object>> maps1 = maps.subList(0, 10);
+//        for (Map<String, Object> map : maps1) {
+//            String address = (String) map.get("address");
+//            Long value = (Long) map.get("value");
+//            UserRegionData userRegionData = new UserRegionData();
+//            userRegionData.setRegion(address);
+//            userRegionData.setValue(Math.toIntExact(value));
+//            userRegionDataList.add(userRegionData);
+//        }
+//        String userRegion = new Gson().toJson(userRegionDataList);
+//        stringRedisTemplate.opsForValue().set("statistics:userRegion",userRegion);
+
+
+        // 统计活动参加率
+        ArrayList<CategoryData> categoryDataList = new ArrayList<>();
+        Integer totalCount = activityMapper.selectTotalCount();
+        Long joinCount = activityMemberMapper.selectCount(null);
+        CategoryData joinData = new CategoryData();
+        CategoryData nullData = new CategoryData();
+        joinData.setName("参加人数");
+        joinData.setValue(Math.toIntExact(joinCount));
+        nullData.setName("空缺人数");
+        nullData.setValue((int) (totalCount-joinCount));
+        categoryDataList.add(joinData);
+        categoryDataList.add(nullData);
+        String activityJoinRate = new Gson().toJson(categoryDataList);
+        stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
     }
 
     @Test

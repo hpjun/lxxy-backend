@@ -72,15 +72,13 @@ public class StatisticsController {
 
     @GetMapping("/activity-join-rate")
     @ApiOperation("获取截至昨天活动参加率")
-    public Result activityJoinRate(){
-        // TODO 获取截至昨天活动参加率
-        return Result.ok("获取截至昨天活动参加率");
+    public Result<List<CategoryData>> activityJoinRate(){
+        return statisticsService.activityJoinRate();
     }
 
     @GetMapping("/user-region")
     @ApiOperation("获取用户地域分布")
     public Result<List<UserRegionData>> userRegion(){
-        // TODO 获取用户地域分布
         return statisticsService.userRegion();
     }
 

@@ -3,6 +3,7 @@ package com.yhp.lxxybackend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.mapper.ActivityMapper;
 import com.yhp.lxxybackend.mapper.PostMapper;
@@ -18,11 +19,13 @@ import com.yhp.lxxybackend.service.StatisticsService;
 import com.yhp.lxxybackend.utils.BusinessUtils;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -545,7 +548,21 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public Result<List<UserRegionData>> userRegion() {
+        // 从Redis中获取用户地域分布
+        String userRegionStr = stringRedisTemplate.opsForValue().get(RedisConstants.USER_REGION_KEY);
+        Type type = new TypeToken<List<UserRegionData>>() {
+        }.getType();
+        List<UserRegionData> userRegionData = new Gson().fromJson(userRegionStr, type);
+        return Result.ok(userRegionData);
+    }
 
-        return null;
+    @Override
+    public Result<List<CategoryData>> activityJoinRate() {
+        // 从Redis获取活动参加率
+        String activityJoinRateStr = stringRedisTemplate.opsForValue().get(RedisConstants.ACTIVITY_JOIN_RATE);
+        Type type = new TypeToken<List<CategoryData>>() {
+        }.getType();
+        List<CategoryData> activityJoinRate = new Gson().fromJson(activityJoinRateStr, type);
+        return Result.ok(activityJoinRate);
     }
 }

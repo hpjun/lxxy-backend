@@ -64,4 +64,10 @@ public interface StatisticsService {
      * @return
      */
     Result<List<UserRegionData>> userRegion();
+
+    /**
+     * 活动参加率
+     * @return
+     */
+    Result<List<CategoryData>> activityJoinRate();
 }
