@@ -139,10 +139,10 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         if(postType == null){
             return Result.fail(MessageConstant.POST_TYPE_NO_EXIST_OR_BAN);
         }
-        if(title.length()>50){
+        if(!(title.length()>0 && title.length()<=50)){
             return Result.fail(MessageConstant.TITLE_TOO_LONG);
         }
-        if(content.length()>1000){
+        if(!(content.length()>0 && content.length()<=1000)){
             return Result.fail(MessageConstant.CONTENT_TOO_LONG);
         }
         if(picUrlList.size()>8){

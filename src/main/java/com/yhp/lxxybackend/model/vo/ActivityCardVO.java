@@ -25,7 +25,7 @@ public class ActivityCardVO {
     // user
     private String picUrl;		//活动封面
     private Integer totalCount;	//最大人数
-    private Date createTime;		//创建时间，用来解决动态数据查询问题
+    private String createTime;		//创建时间，用来解决动态数据查询问题
     private Integer memberCount;	//成员数
     private String status;		//活动状态：x个月后、x天后、即将开始（小于3天）、进行中、结束
 }

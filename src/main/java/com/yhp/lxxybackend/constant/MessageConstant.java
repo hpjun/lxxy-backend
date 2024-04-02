@@ -16,9 +16,13 @@ public class MessageConstant {
 
 
     public static final String POST_TYPE_NO_EXIST_OR_BAN = "该板块不存在或已被禁用";
-    public static final String TITLE_TOO_LONG = "该板块不存在或已被禁用";
+    public static final String POST_TYPE_EXIST = "该板块已存在";
+    public static final String TITLE_TOO_LONG = "标题太长了";
     public static final String CONTENT_TOO_LONG = "内容太长了";
+    public static final String VENUE_TOO_LONG = "集合点字数太长了";
     public static final String PIC_LIMIT = "图片数量不超过8张";
+    public static final String DISTANCE_FAIL = "请输入合理的距离";
+    public static final String LEVEL_FAIL = "活动难度不正确";
 
 
     // 用户和管理员每页数据数量

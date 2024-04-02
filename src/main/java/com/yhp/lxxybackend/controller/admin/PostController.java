@@ -47,7 +47,6 @@ public class PostController {
     @PostMapping()
     @ApiOperation("发布帖子")
     public Result publish(@RequestBody PostDTO postDTO, HttpServletRequest request){
-        // TODO 发布帖子
         String ip = request.getRemoteAddr();
         // TODO 上线取消，本地测试环境，ip先固定
         ip = "223.104.151.72";

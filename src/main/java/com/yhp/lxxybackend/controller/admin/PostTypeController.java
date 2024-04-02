@@ -1,10 +1,16 @@
 package com.yhp.lxxybackend.controller.admin;
 
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.vo.PostTypeVO;
+import com.yhp.lxxybackend.service.PostTypeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jdk.nashorn.internal.runtime.JSType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author yhp
@@ -17,18 +23,20 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class PostTypeController {
 
+    @Resource
+    PostTypeService postTypeService;
+
     @GetMapping("/list")
     @ApiOperation("分页获取板块信息")
-    public Result list(@RequestParam Integer pageNum){
-        // TODO 分页获取板块信息
-        return Result.ok("分页获取板块信息"+pageNum);
+    public Result<List<PostTypeVO>> list(@RequestParam Integer pageNum){
+        return postTypeService.listPostType(pageNum);
     }
 
 
     @GetMapping("/all")
     @ApiOperation("查询所有板块信息")
     public Result all(){
-        // TODO 查询所有板块信息
+        // TODO 查询所有板块信息 List<String>
         return Result.ok("查询所有板块信息");
     }
 
@@ -36,23 +44,20 @@ public class PostTypeController {
     @PostMapping()
     @ApiOperation("新增板块信息")
     public Result add(@RequestParam String typeName){
-        // TODO 新增板块信息,查询板块名称是否冲突
-        return Result.ok("新增板块信息"+typeName);
+        return postTypeService.add(typeName);
     }
 
     @PutMapping("/{postTypeId}")
     @ApiOperation("修改板块信息")
     public Result edit(@PathVariable("postTypeId") Integer postTypeId,
                        @RequestParam String typeName){
-        // TODO 修改板块信息，查询修改的名称是否和已有的冲突
-        return Result.ok("修改板块信息"+postTypeId+typeName);
+        return postTypeService.edit(postTypeId,typeName);
     }
 
     @PutMapping("/status/{postTypeId}")
     @ApiOperation("禁用/启用板块")
     public Result changeStatus(@PathVariable("postTypeId") Integer postTypeId){
-        // TODO 禁用/启用板块，
-        return Result.ok("禁用/启用板块"+postTypeId);
+        return postTypeService.changeStatus(postTypeId);
     }
 
 }

@@ -2,11 +2,14 @@ package com.yhp.lxxybackend.controller.admin;
 
 import com.yhp.lxxybackend.model.dto.ActivityDTO;
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.vo.ActivityCardVO;
+import com.yhp.lxxybackend.service.ActivityService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -20,27 +23,28 @@ import java.util.List;
 @Slf4j
 public class ActivityController {
 
+    @Resource
+    ActivityService activityService;
+
     @GetMapping("/list")
     @ApiOperation("分页获取活动信息")
-    public Result list(@RequestParam Integer pageNum,
-                       @RequestParam String sc,
-                       @RequestParam String level){
-        // TODO 分页获取活动信息
-        return Result.ok("分页获取活动信息"+pageNum+sc+level);
+    public Result<List<ActivityCardVO>> list(@RequestParam Integer pageNum,
+                                             @RequestParam String sc,
+                                             @RequestParam String level){
+        return activityService.listActivity(pageNum,sc,level);
     }
 
     @DeleteMapping("/delete")
     @ApiOperation("批量删除活动")
     public Result delete(@RequestBody List<Integer> ids){
-        // TODO 批量删除活动
-        return Result.ok("批量删除活动"+ids);
+        return activityService.delete(ids);
     }
 
     @PostMapping()
     @ApiOperation("创建活动")
-    public Result createActivity(@RequestBody ActivityDTO activityDTO){
+    public Result publish(@RequestBody ActivityDTO activityDTO){
         // TODO 创建活动，创建的时候自己也要参加该活动
-        return Result.ok("创建活动"+activityDTO);
+        return activityService.publish(activityDTO);
     }
 
     @PutMapping("/{activityId}")
