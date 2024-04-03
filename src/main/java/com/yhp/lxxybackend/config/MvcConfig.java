@@ -39,14 +39,15 @@ public class MvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/user/**")
                 .excludePathPatterns(
                         "/user/user/login",
+                        "/user/user/register",
                         "/user/common/code/*",
+
                         "/user/activity/all",
+                        "/user/activity/*",
                         "/user/post/random/next",
                         "/user/post/latest",
-
-
-
-                        "/voucher/**"
+                        "/user/post/*",
+                        "/user/comment/*"
                 ).order(2);
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
                 .addPathPatterns("/**").order(0);

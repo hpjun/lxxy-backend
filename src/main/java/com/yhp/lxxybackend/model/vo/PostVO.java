@@ -18,9 +18,9 @@ public class PostVO {
     private String title;                        //帖子标题
     private String username;                    //用户名
     private String avatar;                        //用户头像地址
-    private Date createTime;                    //帖子创建时间
+    private String createTime;                    //帖子创建时间
     private String ipRegion;                    //IP属地
-    private Integer postType;                //帖子板块
+    private String postType;                //帖子板块
     private String content;                    //帖子内容
     private List<String> picUrlList;    //帖子图片集合
 

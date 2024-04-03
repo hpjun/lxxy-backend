@@ -5,29 +5,32 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
 import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.exception.BusinessException;
-import com.yhp.lxxybackend.mapper.PostCommentMapper;
-import com.yhp.lxxybackend.mapper.PostTypeMapper;
+import com.yhp.lxxybackend.mapper.*;
 import com.yhp.lxxybackend.model.dto.LoginUserDTO;
 import com.yhp.lxxybackend.model.dto.PostDTO;
 import com.yhp.lxxybackend.model.dto.Result;
-import com.yhp.lxxybackend.model.entity.Post;
-import com.yhp.lxxybackend.model.entity.PostComment;
-import com.yhp.lxxybackend.model.entity.PostType;
+import com.yhp.lxxybackend.model.entity.*;
 import com.yhp.lxxybackend.model.vo.PostCardVO;
+import com.yhp.lxxybackend.model.vo.PostVO;
 import com.yhp.lxxybackend.service.PostCommentService;
 import com.yhp.lxxybackend.service.PostService;
-import com.yhp.lxxybackend.mapper.PostMapper;
 import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import com.yhp.lxxybackend.utils.UserHolder;
+import javafx.geometry.Pos;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.sql.Array;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,6 +50,10 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     PostCommentMapper postCommentMapper;
     @Resource
     Ip2RegionUtils ip2RegionUtils;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
+    @Resource
+    FavoritesMapper favoritesMapper;
 
 
     @Override
@@ -100,7 +107,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
             postMapper.deleteById(id);
             // 删除评论
             postCommentMapper.delete(new QueryWrapper<PostComment>()
-                    .eq("post_id",id));
+                    .eq("post_id", id));
         }
         return Result.ok("删除成功");
     }
@@ -109,16 +116,16 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     public Result changeTop(Integer postId) {
         // 查询该帖子信息
         Post post = postMapper.selectById(postId);
-        if(post == null){
+        if (post == null) {
             return Result.fail("该帖子不存在");
         }
         Integer isTop = post.getIsTop();
-        if(isTop == 1){
+        if (isTop == 1) {
             // 取消置顶
             post.setIsTop(0);
             postMapper.updateById(post);
             return Result.ok(false);
-        }else{
+        } else {
             // 置顶
             post.setIsTop(1);
             postMapper.updateById(post);
@@ -127,7 +134,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     }
 
     @Override
-    public Result publish(PostDTO postDTO,String ip) {
+    public Result publish(PostDTO postDTO, String ip) {
         String postTypeName = postDTO.getPostType();
         String title = postDTO.getTitle();
         String content = postDTO.getContent();
@@ -135,17 +142,17 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         // 校验信息 帖子板块(是否存在，是否被禁用)、标题(50字)、帖子内容(1000字)、帖子图片地址列表(8张)
         PostType postType = postTypeMapper.selectOne(new QueryWrapper<PostType>()
                 .eq("type_name", postTypeName)
-                .eq("status",1));
-        if(postType == null){
+                .eq("status", 1));
+        if (postType == null) {
             return Result.fail(MessageConstant.POST_TYPE_NO_EXIST_OR_BAN);
         }
-        if(!(title.length()>0 && title.length()<=50)){
+        if (!(title.length() > 0 && title.length() <= 50)) {
             return Result.fail(MessageConstant.TITLE_TOO_LONG);
         }
-        if(!(content.length()>0 && content.length()<=1000)){
+        if (!(content.length() > 0 && content.length() <= 1000)) {
             return Result.fail(MessageConstant.CONTENT_TOO_LONG);
         }
-        if(picUrlList.size()>8){
+        if (picUrlList.size() > 8) {
             return Result.fail(MessageConstant.PIC_LIMIT);
         }
         // 拷贝属性
@@ -173,6 +180,109 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
 
         return Result.ok();
     }
+
+    @Override
+    public Result<List<PostCardVO>> getPostByType(String postType, String minTime, Integer offset) {
+
+        QueryWrapper<Post> postQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<Post> topPostQuery = new QueryWrapper<Post>().eq("is_top", 1);
+        // 将minTime转为Date类型方便查数据库
+        long time = Long.parseLong(minTime);
+        Date date = new Date(time);
+        if (!("全部".equals(postType))) {
+            List<PostType> postTypes = postTypeMapper.selectList(new QueryWrapper<PostType>()
+                    .eq("status", 1)
+                    .eq("type_name", postType));
+            if (postTypes.size() == 0) {
+                return Result.fail("请选择正确的板块");
+            }
+            postQueryWrapper.eq("post_type_id", postTypes.get(0).getId());
+            topPostQuery.eq("post_type_id", postTypes.get(0).getId());
+        }
+        postQueryWrapper
+                .lt("create_time", date)
+                .eq("is_top", 0)
+                .orderByDesc("create_time");
+        // 当为第一次查询的时候，先查询置顶帖子
+        List<Post> posts = new ArrayList<>();
+        if (offset == 1) {
+            posts.addAll(postMapper.selectList(topPostQuery));
+        }
+        // 封装分页对象
+        Page<Post> page = new Page<>(offset, MessageConstant.USER_PAGE_SIZE);
+        Page<Post> postPage = postMapper.selectPage(page, postQueryWrapper);
+        ArrayList<PostCardVO> postCardVOList = new ArrayList<>();
+        posts.addAll(postPage.getRecords());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        for (Post post : posts) {
+            PostCardVO postCardVO = BeanUtil.copyProperties(post, PostCardVO.class);
+            // 格式化时间
+            postCardVO.setLcTime(dateFormat.format(post.getLcTime()));
+//            example.jpg?x-oss-process=image/resize,m_fill,h_100,w_100/quality,q_80
+            List<String> picUrlList = postCardVO.getPicUrlList();
+            ArrayList<String> newPic = new ArrayList<>();
+            picUrlList.forEach(pic -> {
+                pic += BusinessConstant.OSS_RESIZE_URL_EXTEND;
+                newPic.add(pic);
+            });
+            postCardVO.setPicUrlList(newPic);
+            postCardVOList.add(postCardVO);
+        }
+//        id title content viewCount commentCount isTop lcTime
+//        userName userAvatar picUrlList
+
+        return Result.ok(postCardVOList);
+    }
+
+    @Override
+    public Result<PostVO> postDetail(Integer postId) {
+        // 获取该帖子信息
+        Post post = postMapper.selectById(postId);
+        if (post == null) {
+            return Result.fail(MessageConstant.POST_NOT_EXIST);
+        }
+        // 增加浏览量-后续在定时任务中将该帖子的浏览量持久化到数据库，然后删除该key，直到第二次访问继续时创建
+        stringRedisTemplate.opsForValue().increment(RedisConstants.POST_VIEW_COUNT + postId);
+
+
+        // 拷贝post属性到postVO
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        PostVO postVO = BeanUtil.copyProperties(post, PostVO.class);
+        postVO.setAvatar(post.getUserAvatar());
+        postVO.setPostType(postTypeMapper.selectById(post.getPostTypeId()).getTypeName());
+        // 格式化时间
+        postVO.setCreateTime(dateFormat.format(post.getCreateTime()));
+//        picUrlList   String -> list
+
+
+        // 默认为false
+        postVO.setIsFavorite(false);
+
+        LoginUserDTO user = UserHolder.getUser();
+        if (user != null) {
+            // 获取当前用户是否收藏
+            List<Favorites> favorites = favoritesMapper.selectList(new QueryWrapper<Favorites>()
+                    .eq("user_id", user.getId())
+                    .eq("post_id", postId));
+            if(favorites.size()!=0){
+                // 该用户收藏过
+                postVO.setIsFavorite(true);
+            }
+        }
+        // 将postVO中的图片进行压缩
+        List<String> picUrlList = postVO.getPicUrlList();
+        ArrayList<String> newPic = new ArrayList<>();
+        picUrlList.forEach(pic ->{
+            pic += BusinessConstant.OSS_70Q_URL_EXTEND;
+            newPic.add(pic);
+        });
+        postVO.setPicUrlList(newPic);
+        return Result.ok(postVO);
+    }
+
+
 }
 
 

@@ -122,11 +122,14 @@ public class test {
 //        System.out.println(bytes.length);
 //        System.out.println(UUID.randomUUID()+".png");
 
-        String startTimeStr = "2024-04-02 19:00:00";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse(startTimeStr, formatter);
+//        String startTimeStr = "2024-04-02 19:00:00";
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        LocalDateTime startTime = LocalDateTime.parse(startTimeStr, formatter);
 
-
+        String a = "asjhf";
+        System.out.println(a);
+        a = a+ "kaslf";
+        System.out.println(a);
     }
 
 }

@@ -3,12 +3,16 @@ package com.yhp.lxxybackend.controller.user;
 import com.yhp.lxxybackend.constant.MessageConstant;
 import com.yhp.lxxybackend.model.dto.CommentDTO;
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.vo.CommentVO;
+import com.yhp.lxxybackend.service.PostCommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.print.attribute.ResolutionSyntax;
+import java.util.List;
 
 /**
  * @author yhp
@@ -21,14 +25,16 @@ import javax.print.attribute.ResolutionSyntax;
 @Slf4j
 public class CommentController {
 
+    @Resource
+    PostCommentService postCommentService;
 
     @GetMapping("/{postId}")
     @ApiOperation("获取帖子的评论")
-    public Result getPostComment(@PathVariable("postId") Integer postId,
-                                 @RequestParam String minTime,
-                                 @RequestParam(required = false, defaultValue = "0") Integer offset) {
+    public Result<List<CommentVO>> getPostComment(@PathVariable("postId") Integer postId,
+                                                  @RequestParam String minTime,
+                                                  @RequestParam Integer offset) {
         // TODO 获取帖子的评论
-        return  Result.ok("获取主页关注列表"+postId+minTime+offset+ MessageConstant.USER_PAGE_SIZE+5);
+        return  postCommentService.getPostComment(postId,minTime,offset);
     }
 
     @PostMapping("/{postId}")

@@ -5,6 +5,7 @@ import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.entity.Post;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yhp.lxxybackend.model.vo.PostCardVO;
+import com.yhp.lxxybackend.model.vo.PostVO;
 
 import java.util.List;
 
@@ -42,5 +43,19 @@ public interface PostService extends IService<Post> {
     Result publish(PostDTO postDTO,String ip);
 
 
+    /**
+     * 用户端分类查询帖子
+     * @param postType
+     * @param minTime
+     * @param offset
+     * @return
+     */
+    Result<List<PostCardVO>> getPostByType(String postType, String minTime, Integer offset);
 
+    /**
+     * 获取帖子详情
+     * @param postId
+     * @return
+     */
+    Result<PostVO> postDetail(Integer postId);
 }

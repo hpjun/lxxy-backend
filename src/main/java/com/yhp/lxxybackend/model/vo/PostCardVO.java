@@ -24,9 +24,11 @@ public class PostCardVO {
     private String createTime;            //创建时间
     private Boolean isTop;                    //是否置顶
 
+
+
     // user需要的字段
     private Integer userId;			//创建的用户id
     private String userAvatar;		//用户头像
-    private Date lcTime;				//最后评论时间
+    private String lcTime;				//最后评论时间
     private List<String> picUrlList;	//帖子图片列表
 }

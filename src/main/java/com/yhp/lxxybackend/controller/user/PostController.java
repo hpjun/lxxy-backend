@@ -3,11 +3,14 @@ package com.yhp.lxxybackend.controller.user;
 import com.yhp.lxxybackend.model.dto.PostDTO;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.vo.PostCardVO;
+import com.yhp.lxxybackend.model.vo.PostVO;
+import com.yhp.lxxybackend.service.PostService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -21,6 +24,9 @@ import java.util.List;
 @Slf4j
 public class PostController {
 
+    @Resource
+    PostService postService;
+
     @GetMapping("/random/next")
     @ApiOperation("主页获得随机帖子")
     public Result getPostCard(){
@@ -30,18 +36,17 @@ public class PostController {
 
     @GetMapping("/latest")
     @ApiOperation("分类获取帖子")
-    public Result getPostByType(@RequestParam String postType,
+    public Result<List<PostCardVO>> getPostByType(@RequestParam String postType,
                           @RequestParam String minTime,
-                          @RequestParam(required = false, defaultValue = "0") Integer offset){
-        // TODO 分类获取帖子
-        return Result.ok("分类获取帖子"+postType+minTime+offset);
+                          @RequestParam Integer offset){
+        return postService.getPostByType(postType,minTime,offset);
     }
 
     @GetMapping("/{postId}")
     @ApiOperation("获取帖子详情")
-    public Result postDetail(@PathVariable("postId") Integer postId){
+    public Result<PostVO> postDetail(@PathVariable("postId") Integer postId){
         // TODO 获取帖子详情
-        return Result.ok("获取帖子详情"+postId);
+        return postService.postDetail(postId);
     }
 
     @PostMapping("/favorite/{postId}")

@@ -20,6 +20,7 @@ public class OssConfig {
     private String accessKeyId;
     private String accessKeySecret;
     private String bucketName;
+    private Boolean cname;
 
     @Bean
     @ConditionalOnMissingBean
@@ -28,6 +29,7 @@ public class OssConfig {
         return new AliOssUtil(endpoint,
                 accessKeyId,
                 accessKeySecret,
-                bucketName);
+                bucketName,
+                cname);
     }
 }

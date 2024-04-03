@@ -10,9 +10,10 @@ import com.google.gson.Gson;
 import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
 import com.yhp.lxxybackend.constant.RedisConstants;
-import com.yhp.lxxybackend.mapper.ActivityMapper;
-import com.yhp.lxxybackend.mapper.ActivityMemberMapper;
-import com.yhp.lxxybackend.mapper.UserMapper;
+import com.yhp.lxxybackend.mapper.*;
+import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.entity.Post;
+import com.yhp.lxxybackend.model.entity.PostType;
 import com.yhp.lxxybackend.model.entity.User;
 import com.yhp.lxxybackend.model.vo.CategoryData;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
@@ -43,6 +44,10 @@ class LxxyBackendApplicationTests {
    ActivityMemberMapper activityMemberMapper;
    @Resource
    Ip2RegionUtils ip2RegionUtils;
+   @Resource
+   PostTypeMapper postTypeMapper;
+   @Resource
+   PostMapper postMapper;
 
    @Resource
    StringRedisTemplate stringRedisTemplate;
@@ -105,14 +110,46 @@ class LxxyBackendApplicationTests {
 //        String activityJoinRate = new Gson().toJson(categoryDataList);
 //        stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
 
-        Searcher searcher = ip2RegionUtils.getSearcher();
-        String ip = "223.104.151.72";
-        try {
-            String region = searcher.search(ip);
-            System.out.println(region);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+//        Searcher searcher = ip2RegionUtils.getSearcher();
+//        String ip = "223.104.151.72";
+//        try {
+//            String region = searcher.search(ip);
+//            System.out.println(region);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+
+        String minTime = "1712068975000";
+        long time = Long.parseLong(minTime);
+        String postType = "二手交易";
+        Integer offset = 1;
+        QueryWrapper<Post> postQueryWrapper = new QueryWrapper<>();
+        // 将minTime转为Date类型方便查数据库
+        Date date = new Date(time);
+        Long postTypeId = null;
+        if (!("全部".equals(postType))){
+            List<PostType> postTypes = postTypeMapper.selectList(new QueryWrapper<PostType>().eq("status", 1));
+            for (PostType type : postTypes) {
+                if(type.getTypeName().equals(postType)){
+                    postTypeId = type.getId();
+                    postQueryWrapper.eq("post_type_id",postTypeId);
+                    break;
+                }
+            }
+            if(postTypeId == null){
+                System.out.println("请选择正确的板块");
+            }
         }
+        postQueryWrapper
+                .lt("create_time",date)
+                .orderByDesc("create_time");
+        // 封装分页对象
+        Page<Post> page = new Page<>(offset,MessageConstant.USER_PAGE_SIZE);
+//        List<Post> posts = postMapper.selectList(postQueryWrapper);
+        Page<Post> postPage = postMapper.selectPage(page, postQueryWrapper);
+        List<Post> posts = postPage.getRecords();
+        posts.forEach(System.out::println);
+
     }
 
     @Test

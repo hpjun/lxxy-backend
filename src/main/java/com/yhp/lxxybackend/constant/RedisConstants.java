@@ -11,6 +11,10 @@ public class RedisConstants {
     // 日统计的有效期为32天
     public static final long STATISTICS_DAY_TTL = 32L;
 
+
+
+    public static final String POST_VIEW_COUNT = "statistics:post:viewCount:";
+
     public static final String TOTAL_UV_KEY = "statistics:total:uv";
     public static final String TOTAL_PV_KEY = "statistics:total:pv";
     public static final String USER_REGION_KEY = "statistics:userRegion";

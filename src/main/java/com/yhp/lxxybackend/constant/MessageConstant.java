@@ -25,6 +25,11 @@ public class MessageConstant {
     public static final String LEVEL_FAIL = "活动难度不正确";
 
 
+
+    public static final String POST_NOT_EXIST = "帖子不存在";
+
+
+
     // 用户和管理员每页数据数量
     public static final Integer USER_PAGE_SIZE = 5;
     public static final Integer ADMIN_PAGE_SIZE = 10;

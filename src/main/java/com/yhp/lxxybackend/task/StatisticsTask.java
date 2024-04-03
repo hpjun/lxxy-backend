@@ -141,4 +141,28 @@ public class StatisticsTask {
         String activityJoinRate = new Gson().toJson(categoryDataList);
         stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
     }
+
+
+    /**
+     * 每5分钟进行持久化
+     */
+    @Scheduled(cron = "0 0/5 * * * ?")
+    public void statisticsTask(){
+        // 对帖子浏览量进行持久化
+        Set<String> postKeys = stringRedisTemplate.keys(RedisConstants.POST_VIEW_COUNT+"*");
+        if(postKeys != null){
+            for (String postKey : postKeys) {
+                String viewCount = stringRedisTemplate.opsForValue().get(postKey);
+                String[] split = postKey.split(":");
+                String postId = split[split.length - 1];
+                Post post = postMapper.selectById(postId);
+                if(post != null){
+                    post.setViewCount(post.getViewCount()+Long.parseLong(viewCount));
+                    postMapper.updateById(post);
+                }
+                stringRedisTemplate.delete(postKey);
+            }
+        }
+
+    }
 }

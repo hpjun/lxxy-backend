@@ -1,9 +1,6 @@
 package com.yhp.lxxybackend.utils;
 
-import com.aliyun.oss.ClientException;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.OSSException;
+import com.aliyun.oss.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +16,7 @@ public class AliOssUtil {
     private String accessKeyId;
     private String accessKeySecret;
     private String bucketName;
+    private Boolean cname;
 
     /**
      * 文件上传
@@ -29,8 +27,14 @@ public class AliOssUtil {
      */
     public String upload(byte[] bytes, String objectName) {
 
+        // 创建ClientBuilderConfiguration实例，您可以根据实际情况修改默认参数。
+        ClientBuilderConfiguration conf = new ClientBuilderConfiguration();
+        // 设置是否支持CNAME。CNAME用于将自定义域名绑定到目标Bucket。
+        conf.setSupportCname(cname);
+
         // 创建OSSClient实例。
-        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret,conf);
+
 
         try {
             // 创建PutObject请求。
@@ -55,9 +59,14 @@ public class AliOssUtil {
 
         //文件访问路径规则 https://BucketName.Endpoint/ObjectName
         StringBuilder stringBuilder = new StringBuilder("https://");
+//        stringBuilder
+//                .append(bucketName)
+//                .append(".")
+//                .append(endpoint)
+//                .append("/")
+//                .append(objectName);
+
         stringBuilder
-                .append(bucketName)
-                .append(".")
                 .append(endpoint)
                 .append("/")
                 .append(objectName);

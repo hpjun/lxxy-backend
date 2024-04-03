@@ -58,6 +58,7 @@ lxxy:
     access-key-id: ${lxxy.alioss.access-key-secret}
     access-key-secret: ${lxxy.alioss.access-key-secret}
     bucket-name: ${lxxy.alioss.bucket-name}
+    cname: ${lxxy.alioss.cname}
 
 # 接口文档配置
 knife4j:

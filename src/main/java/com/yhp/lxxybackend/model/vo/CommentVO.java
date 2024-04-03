@@ -18,5 +18,5 @@ public class CommentVO {
     private String avatar;        //用户头像
     private String ipRegion;        //IP属地
     private String comment;        //评论内容
-    private Date createTime;        //发布时间
+    private String createTime;        //发布时间
 }
