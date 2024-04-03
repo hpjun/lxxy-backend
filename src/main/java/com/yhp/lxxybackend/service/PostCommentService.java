@@ -1,5 +1,6 @@
 package com.yhp.lxxybackend.service;
 
+import com.yhp.lxxybackend.model.dto.CommentDTO;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.entity.PostComment;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -22,4 +23,12 @@ public interface PostCommentService extends IService<PostComment> {
      * @return
      */
     Result<List<CommentVO>> getPostComment(Integer postId, String minTime, Integer offset);
+
+    /**
+     * 发布帖子评论
+     * @param postId
+     * @param commentStr
+     * @return
+     */
+    Result writeComment(Integer postId, String commentStr,String ip);
 }

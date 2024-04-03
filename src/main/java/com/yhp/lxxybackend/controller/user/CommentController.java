@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.print.attribute.ResolutionSyntax;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -33,16 +34,18 @@ public class CommentController {
     public Result<List<CommentVO>> getPostComment(@PathVariable("postId") Integer postId,
                                                   @RequestParam String minTime,
                                                   @RequestParam Integer offset) {
-        // TODO 获取帖子的评论
         return  postCommentService.getPostComment(postId,minTime,offset);
     }
 
     @PostMapping("/{postId}")
     @ApiOperation("发布帖子评论")
     public Result writeComment(@PathVariable("postId") Integer postId,
-                               @RequestBody CommentDTO commentDTO){
-        // TODO 发布帖子评论，需要将该帖子的lc_time更新一下
-        return Result.ok("发布帖子评论"+postId+commentDTO);
+                               @RequestParam String commentStr,
+                               HttpServletRequest request){
+        String ip = request.getRemoteAddr();
+        // TODO 上线取消，本地测试环境，ip先固定
+        ip = "223.104.151.72";
+        return postCommentService.writeComment(postId,commentStr,ip);
     }
 
 }

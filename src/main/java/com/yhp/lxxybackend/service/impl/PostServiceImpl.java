@@ -266,7 +266,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
             List<Favorites> favorites = favoritesMapper.selectList(new QueryWrapper<Favorites>()
                     .eq("user_id", user.getId())
                     .eq("post_id", postId));
-            if(favorites.size()!=0){
+            if (favorites.size() != 0) {
                 // 该用户收藏过
                 postVO.setIsFavorite(true);
             }
@@ -274,12 +274,50 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         // 将postVO中的图片进行压缩
         List<String> picUrlList = postVO.getPicUrlList();
         ArrayList<String> newPic = new ArrayList<>();
-        picUrlList.forEach(pic ->{
+        picUrlList.forEach(pic -> {
             pic += BusinessConstant.OSS_70Q_URL_EXTEND;
             newPic.add(pic);
         });
         postVO.setPicUrlList(newPic);
         return Result.ok(postVO);
+    }
+
+    @Override
+    public Result favorite(Integer postId) {
+        LoginUserDTO user = UserHolder.getUser();
+        if (user == null) {
+            return Result.fail("请先登录");
+        }
+        QueryWrapper<Favorites> favoritesQueryWrapper = new QueryWrapper<>();
+        favoritesQueryWrapper
+                .eq("user_id", user.getId())
+                .eq("post_id", postId);
+        Favorites favorites = favoritesMapper.selectOne(favoritesQueryWrapper);
+        if (favorites != null) {
+            return Result.ok("收藏成功");
+        }
+        favorites = new Favorites();
+        favorites.setPostId(Long.valueOf(postId));
+        favorites.setUserId(user.getId());
+        favoritesMapper.insert(favorites);
+
+        return Result.ok("收藏成功");
+    }
+
+    @Override
+    public Result unFavorite(Integer postId) {
+        LoginUserDTO user = UserHolder.getUser();
+        if (user == null) {
+            return Result.fail("请先登录");
+        }
+        // 直接删除
+        QueryWrapper<Favorites> favoritesQueryWrapper = new QueryWrapper<>();
+        favoritesQueryWrapper
+                .eq("user_id", user.getId())
+                .eq("post_id", postId);
+        favoritesMapper.delete(favoritesQueryWrapper);
+
+        return Result.ok("已取消收藏");
     }
 
 

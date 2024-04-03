@@ -45,22 +45,19 @@ public class PostController {
     @GetMapping("/{postId}")
     @ApiOperation("获取帖子详情")
     public Result<PostVO> postDetail(@PathVariable("postId") Integer postId){
-        // TODO 获取帖子详情
         return postService.postDetail(postId);
     }
 
     @PostMapping("/favorite/{postId}")
     @ApiOperation("收藏帖子")
     public Result favorite(@PathVariable("postId") Integer postId){
-        // TODO 收藏帖子
-        return Result.ok("收藏帖子"+postId);
+        return postService.favorite(postId);
     }
 
     @PostMapping("/un-favorite/{postId}")
     @ApiOperation("取消收藏帖子")
     public Result unFavorite(@PathVariable("postId") Integer postId){
-        // TODO 取消收藏帖子
-        return Result.ok("取消收藏帖子"+postId);
+        return postService.unFavorite(postId);
     }
 
     @PostMapping()

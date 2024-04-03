@@ -58,4 +58,18 @@ public interface PostService extends IService<Post> {
      * @return
      */
     Result<PostVO> postDetail(Integer postId);
+
+    /**
+     * 收藏帖子
+     * @param postId
+     * @return
+     */
+    Result favorite(Integer postId);
+
+    /**
+     * 取消收藏
+     * @param postId
+     * @return
+     */
+    Result unFavorite(Integer postId);
 }
