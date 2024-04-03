@@ -275,7 +275,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         List<String> picUrlList = postVO.getPicUrlList();
         ArrayList<String> newPic = new ArrayList<>();
         picUrlList.forEach(pic -> {
-            pic += BusinessConstant.OSS_70Q_URL_EXTEND;
+            pic += BusinessConstant.OSS_60Q_URL_EXTEND;
             newPic.add(pic);
         });
         postVO.setPicUrlList(newPic);

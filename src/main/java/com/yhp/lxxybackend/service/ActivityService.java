@@ -5,6 +5,7 @@ import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.entity.Activity;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yhp.lxxybackend.model.vo.ActivityCardVO;
+import com.yhp.lxxybackend.model.vo.ActivityVO;
 
 import java.util.List;
 
@@ -37,4 +38,33 @@ public interface ActivityService extends IService<Activity> {
      * @return
      */
     Result publish(ActivityDTO activityDTO);
+
+    /**
+     * 分页获取所有活动
+     * @param minTime
+     * @param offset
+     * @return
+     */
+    Result<List<ActivityCardVO>> getAll(String minTime, Integer offset);
+
+    /**
+     * 获取活动详情
+     * @param activityId
+     * @return
+     */
+    Result<ActivityVO> activityDetail(Integer activityId);
+
+    /**
+     * 参加活动
+     * @param activityId
+     * @return
+     */
+    Result join(Integer activityId);
+
+    /**
+     * 取消参加活动
+     * @param activityId
+     * @return
+     */
+    Result unJoin(Integer activityId);
 }

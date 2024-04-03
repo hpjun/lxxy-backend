@@ -287,7 +287,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public Result changeStatus(Integer userId) {
         User user = userMapper.selectById(userId);
         if(user == null){
-            return Result.fail("该用户不存在");
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
         }
         Integer ban = user.getBan();
         if(ban == 0){

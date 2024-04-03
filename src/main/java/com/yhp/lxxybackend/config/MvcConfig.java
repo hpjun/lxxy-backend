@@ -26,6 +26,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Resource
     StringRedisTemplate stringRedisTemplate;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
@@ -43,7 +44,6 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/user/common/code/*",
 
                         "/user/activity/all",
-                        "/user/activity/*",
                         "/user/post/random/next",
                         "/user/post/latest",
                         "/user/post/*",
@@ -77,7 +77,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
-    public Ip2RegionUtils getSearcher(){
+    public Ip2RegionUtils getSearcher() {
         log.info("开始创建ip2RegionUtils对象");
         return new Ip2RegionUtils();
     }

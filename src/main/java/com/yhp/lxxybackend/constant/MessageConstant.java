@@ -27,6 +27,8 @@ public class MessageConstant {
 
 
     public static final String POST_NOT_EXIST = "帖子不存在";
+    public static final String ACTIVITY_NOT_EXIST = "活动不存在";
+    public static final String USER_NOT_LOGIN = "当前未登录，请先登录";
 
 
 

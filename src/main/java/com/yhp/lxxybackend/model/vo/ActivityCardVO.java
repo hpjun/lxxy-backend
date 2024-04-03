@@ -3,6 +3,7 @@ package com.yhp.lxxybackend.model.vo;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author yhp

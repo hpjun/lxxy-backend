@@ -21,8 +21,8 @@ public class ActivityVO {
     private String profile;        //简介
     private Integer distance;        //距离
     private Integer totalCount;    //总人数
-    private Date startTime;            //开始时间
-    private Date endTime;                //结束时间
+    private String startTime;            //开始时间
+    private String endTime;                //结束时间
     private Integer memberCount;//当前成员数，需要查表
 
     // user
