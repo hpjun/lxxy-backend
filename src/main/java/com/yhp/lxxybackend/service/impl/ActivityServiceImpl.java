@@ -330,6 +330,69 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
 
         return Result.ok(false);
     }
+
+    @Override
+    public Result<List<ActivityCardVO>> getMine(Integer offset) {
+        LoginUserDTO user = UserHolder.getUser();
+        if(user == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        QueryWrapper<Activity> activityQueryWrapper = new QueryWrapper<>();
+        activityQueryWrapper.eq("user_id",user.getId());
+        Page<Activity> page = new Page<>(offset,MessageConstant.USER_PAGE_SIZE);
+        Page<Activity> activityPage = activityMapper.selectPage(page, activityQueryWrapper);
+        List<Activity> activities = activityPage.getRecords();
+        ArrayList<ActivityCardVO> activityCardVOList = new ArrayList<>();
+        for (Activity activity : activities) {
+            ActivityCardVO activityCardVO = BeanUtil.copyProperties(activity, ActivityCardVO.class);
+            // 进行图片压缩
+            activityCardVO.setPicUrl(activity.getPicUrl() + BusinessConstant.OSS_RESIZE_URL_EXTEND);
+            Long memberCount = activityMemberMapper.selectCount(new QueryWrapper<ActivityMember>()
+                    .eq("activity_id", activity.getId()));
+            activityCardVO.setMemberCount(Math.toIntExact(memberCount));
+            activityCardVOList.add(activityCardVO);
+        }
+
+        return Result.ok(activityCardVOList);
+    }
+
+    @Override
+    public Result<List<ActivityCardVO>> getJoined(Integer offset) {
+        LoginUserDTO user = UserHolder.getUser();
+        if(user == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        // 获取我参加的活动
+        Page<ActivityMember> page = new Page<>(offset, MessageConstant.USER_PAGE_SIZE);
+        Page<ActivityMember> activityMemberPage = activityMemberMapper.selectPage(page, new QueryWrapper<ActivityMember>()
+                .eq("user_id", user.getId()));
+        List<ActivityMember> activityMembers = activityMemberPage.getRecords();
+
+
+
+        ArrayList<Long> activityIds = new ArrayList<>();
+        List<Activity> activities = new ArrayList<>();
+        if(activityMembers.size()>0){
+            activityMembers.forEach(a->{
+                activityIds.add(a.getActivityId());
+            });
+            activities = activityMapper.selectBatchIds(activityIds);
+        }
+
+
+        ArrayList<ActivityCardVO> activityCardVOList = new ArrayList<>();
+        for (Activity activity : activities) {
+            ActivityCardVO activityCardVO = BeanUtil.copyProperties(activity, ActivityCardVO.class);
+            // 进行图片压缩
+            activityCardVO.setPicUrl(activity.getPicUrl() + BusinessConstant.OSS_RESIZE_URL_EXTEND);
+            Long memberCount = activityMemberMapper.selectCount(new QueryWrapper<ActivityMember>()
+                    .eq("activity_id", activity.getId()));
+            activityCardVO.setMemberCount(Math.toIntExact(memberCount));
+            activityCardVOList.add(activityCardVO);
+        }
+
+        return Result.ok(activityCardVOList);
+    }
 }
 
 

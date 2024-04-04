@@ -30,6 +30,12 @@ public class CommonController {
         return commonService.sendCode(phone);
     }
 
+    @PostMapping("/code")
+    @ApiOperation("发送验证码")
+    public Result sendCodeNoPhone() {
+        return commonService.sendCode("");
+    }
+
     @PostMapping("/upload")
     @ApiOperation("上传图片")
     public Result upload(MultipartFile file) {

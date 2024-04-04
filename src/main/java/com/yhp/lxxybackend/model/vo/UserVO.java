@@ -20,8 +20,8 @@ public class UserVO {
     private Integer fansCount;            //粉丝人数
     private Integer followsCount;    //关注人数
 
-    private Integer sex;                    //性别
-    private Date birthday;                    //生日
+    private String sex;                    //性别
+    private String birthday;                    //生日
     private String address;                //用户地址
 
 

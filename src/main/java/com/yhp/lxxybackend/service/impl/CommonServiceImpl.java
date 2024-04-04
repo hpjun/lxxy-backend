@@ -101,7 +101,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public Result sendCode(String phone) {
-        if (StrUtil.isBlank(phone) || "undefined".equals(phone)) {
+        if (StrUtil.isBlank(phone)) {
             // 没有手机号，获取当前登录的手机号
             LoginUserDTO user = UserHolder.getUser();
             if (user == null) {
@@ -120,6 +120,7 @@ public class CommonServiceImpl implements CommonService {
         // 检查Redis中是否有验证码
         String s = stringRedisTemplate.opsForValue().get(RedisConstants.LOGIN_CODE_KEY + phone);
         if (!StrUtil.isBlank(s)) {
+            log.debug("发送短信验证码成功：{}", s);
             return Result.ok("已发送验证码");
         }
 

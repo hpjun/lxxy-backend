@@ -1,6 +1,7 @@
 package com.yhp.lxxybackend;
 
 import com.yhp.lxxybackend.constant.RedisConstants;
+import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.utils.BusinessUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,7 +25,7 @@ import java.util.*;
 public class test {
 
     @Test
-    void test(){
+    void test() {
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        Date date = new Date();
 //        System.out.println(dateFormat.format(date));
@@ -126,10 +128,25 @@ public class test {
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 //        LocalDateTime startTime = LocalDateTime.parse(startTimeStr, formatter);
 
-        String a = "asjhf";
-        System.out.println(a);
-        a = a+ "kaslf";
-        System.out.println(a);
+//        UserDTO userDTO = new UserDTO();
+//        userDTO.setAvatar("124124");
+//
+//        Field[] fields = userDTO.getClass().getDeclaredFields();
+//
+//        for (Field field : fields) {
+//            try {
+//                field.setAccessible(true);
+//                Object value = field.get(userDTO);
+//
+//                if(value != null){
+//                    System.out.println(field.getName() + ":" + value);
+//                }else{
+//                    System.out.println(field.getName() + ":值为null");
+//                }
+//            } catch (IllegalAccessException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
     }
 
 }

@@ -16,9 +16,9 @@ public class UserDTO {
     private String avatar;		//头像
     private String profile;		//简介
 
-    private Integer sex;			//性别
-    private Date birthday;		//生日
-    private String address;		//用户地址
+    private String sex;			//性别
+    private String birthday;		//生日
+    private String address;		//用户地址 "香港特别行政区-新界-北区"
 
     private String newPassword;	//新密码
 

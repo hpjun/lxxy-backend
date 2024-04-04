@@ -1,10 +1,12 @@
 package com.yhp.lxxybackend.service;
 
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
 import com.yhp.lxxybackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
+import com.yhp.lxxybackend.model.vo.UserVO;
 
 import java.util.List;
 
@@ -64,4 +66,23 @@ public interface UserService extends IService<User> {
      * @return
      */
     Result changeStatus(Integer userId);
+
+    /**
+     * 获取主页用户信息
+     * @return
+     */
+    Result<UserVO> userInfo();
+
+    /**
+     * 获取我的详细信息
+     * @return
+     */
+    Result<UserDTO> detail();
+
+    /**
+     * 编辑用户资料
+     * @param userDTO
+     * @return
+     */
+    Result<UserDTO> edit(UserDTO userDTO);
 }

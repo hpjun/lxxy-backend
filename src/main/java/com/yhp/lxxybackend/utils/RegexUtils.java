@@ -42,6 +42,10 @@ public class RegexUtils {
     public static boolean isPasswordInvalid(String password){
         return mismatch(password, RegexPatterns.PASSWORD_REGEX);
     }
+    public static boolean isAddressInvalid(String address){
+        // 匹配具有两个连字符的地址
+        return mismatch(address, RegexPatterns.ADDRESS_REGEX);
+    }
 
     // 校验是否不符合正则格式
     private static boolean mismatch(String str, String regex){

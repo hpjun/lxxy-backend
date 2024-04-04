@@ -67,4 +67,18 @@ public interface ActivityService extends IService<Activity> {
      * @return
      */
     Result unJoin(Integer activityId);
+
+    /**
+     * 分页获取我创建的活动
+     * @param offset
+     * @return
+     */
+    Result<List<ActivityCardVO>> getMine(Integer offset);
+
+    /**
+     * 分页获取我参加的活动
+     * @param offset
+     * @return
+     */
+    Result<List<ActivityCardVO>> getJoined(Integer offset);
 }

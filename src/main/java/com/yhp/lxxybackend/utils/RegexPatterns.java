@@ -22,4 +22,6 @@ public abstract class RegexPatterns {
      * 验证码正则, 6位数字
      */
     public static final String VERIFY_CODE_REGEX = "^\\d{6}$";
+
+    public static final String ADDRESS_REGEX = "^[^-]+-[^-]+-[^-]+$";
 }

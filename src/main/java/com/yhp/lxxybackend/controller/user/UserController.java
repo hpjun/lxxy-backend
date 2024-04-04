@@ -7,6 +7,7 @@ import com.yhp.lxxybackend.model.dto.PostDTO;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
+import com.yhp.lxxybackend.model.vo.UserVO;
 import com.yhp.lxxybackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,30 +41,26 @@ public class UserController {
 
     @GetMapping("/user-info")
     @ApiOperation("获取主页用户信息")
-    public Result userInfo(){
-        // TODO 获取主页用户信息
-        return Result.ok("获取主页用户信息");
+    public Result<UserVO> userInfo(){
+        return userService.userInfo();
     }
 
-    @GetMapping("/{userId}")
-    @ApiOperation("获取用户详细信息")
-    public Result Detail(@PathVariable("userId") Integer userId){
-//        TODO 获取用户详细信息，不包含敏感信息
-        return Result.ok("获取用户详细信息"+userId);
+    @GetMapping()
+    @ApiOperation("获取我的详细信息")
+    public Result<UserDTO> detail(){
+        return userService.detail();
     }
 
     @GetMapping("/logout")
     @ApiOperation("退出当前登录用户")
     public Result logout(){
-        // TODO 退出当前登录用户
-        return Result.ok("退出当前登录用户");
+        return userService.logout();
     }
 
     @PutMapping()
     @ApiOperation("编辑当前用户资料")
-    public Result edit(@RequestBody UserDTO userDTO){
-        // TODO 编辑当前用户资料
-        return Result.ok("编辑当前用户资料"+userDTO);
+    public Result<UserDTO> edit(@RequestBody UserDTO userDTO){
+        return userService.edit(userDTO);
     }
 
     @GetMapping("/dynamic")
@@ -122,7 +119,4 @@ public class UserController {
         // TODO 取消关注
         return Result.ok("取消关注"+followUserId);
     }
-
-
-
 }

@@ -38,16 +38,15 @@ public class ActivityController {
 
     @GetMapping("/mine")
     @ApiOperation("分页获取我的活动")
-    public Result getMine(@RequestParam Integer offset) {
-        // TODO 感觉可以调用相同的Service，因为权限校验已经由拦截器做完了
-        return Result.ok("分页获取我的活动"  + offset);
+    public Result<List<ActivityCardVO>> getMine(@RequestParam Integer offset) {
+        return activityService.getMine(offset);
     }
 
     @GetMapping("/joined")
     @ApiOperation("分页获取我参加的活动")
-    public Result getJoined(@RequestParam Integer offset) {
+    public Result<List<ActivityCardVO>> getJoined(@RequestParam Integer offset) {
         // TODO 感觉可以调用相同的Service，因为权限校验已经由拦截器做完了
-        return Result.ok("分页获取我参加的活动"  + offset);
+        return activityService.getJoined(offset);
     }
 
     @PostMapping("/join/{activityId}")

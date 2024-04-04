@@ -5,6 +5,14 @@ public class MessageConstant {
     public static final String UN_AUTH = "无权限";
     public static final String ACCOUNT_LOCKED = "账号被锁定";
 
+    public static final String ADDRESS_FORMAT = "地址格式不对";
+    public static final String USERNAME_LENGTH = "用户名长度不对";
+    public static final String USER_PROFILE_LENGTH = "用户简介长度不对";
+    public static final String USER_SEX_ERROR = "用户性别不对";
+    public static final String USER_BIRTHDAY_ERROR = "时间不对";
+
+
+
     public static final String PHONE_REGISTERED = "该手机号已注册";
     public static final String PASSWORD_FORMAT = "密码格式不对";
     public static final String CODE_FAIL = "验证码错误";
