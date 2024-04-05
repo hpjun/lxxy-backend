@@ -13,13 +13,15 @@ import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
 import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.exception.BusinessException;
+import com.yhp.lxxybackend.mapper.FavoritesMapper;
 import com.yhp.lxxybackend.mapper.FollowMapper;
-import com.yhp.lxxybackend.model.dto.LoginUserDTO;
-import com.yhp.lxxybackend.model.dto.Result;
-import com.yhp.lxxybackend.model.dto.UserDTO;
-import com.yhp.lxxybackend.model.dto.UserFormDTO;
+import com.yhp.lxxybackend.mapper.PostMapper;
+import com.yhp.lxxybackend.model.dto.*;
+import com.yhp.lxxybackend.model.entity.Favorites;
 import com.yhp.lxxybackend.model.entity.Follow;
+import com.yhp.lxxybackend.model.entity.Post;
 import com.yhp.lxxybackend.model.entity.User;
+import com.yhp.lxxybackend.model.vo.PostCardVO;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
 import com.yhp.lxxybackend.model.vo.UserVO;
 import com.yhp.lxxybackend.service.UserService;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.sql.Array;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +55,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     StringRedisTemplate stringRedisTemplate;
     @Resource
     FollowMapper followMapper;
+    @Resource
+    FavoritesMapper favoritesMapper;
+    @Resource
+    PostMapper postMapper;
 
     @Override
     public Result register(UserFormDTO userFormDTO) {
@@ -422,6 +429,164 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 写入数据库
         userMapper.updateById(user);
         return Result.ok();
+    }
+
+    @Override
+    public Result<List<UserCardDTO>> fans(Integer pageNum) {
+        LoginUserDTO u = UserHolder.getUser();
+        if(u == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        User user = userMapper.selectById(u.getId());
+        // 查看该用户的粉丝列表
+        Page<Follow> page = new Page<>(pageNum,MessageConstant.ADMIN_PAGE_SIZE);
+        Page<Follow> followPage = followMapper.selectPage(page, new QueryWrapper<Follow>()
+                .eq("follow_user_id", user.getId()));
+        List<Follow> fanList = followPage.getRecords();
+        // 查询我们的关注列表
+        List<Follow> followList = followMapper.selectList(new QueryWrapper<Follow>().eq("user_id", user.getId()));
+        ArrayList<Long> followIds = new ArrayList<>();
+        followList.forEach(follow -> {
+            followIds.add(follow.getFollowUserId());
+        });
+
+        ArrayList<UserCardDTO> userCardDTOList = new ArrayList<>();
+        if(fanList.size()>0){
+            ArrayList<Long> fanIds = new ArrayList<>();
+            for (Follow fan : fanList) {
+                fanIds.add(fan.getUserId());
+            }
+            List<User> fans = userMapper.selectBatchIds(fanIds);
+            for (User fan : fans) {
+                UserCardDTO userCardDTO = new UserCardDTO();
+                userCardDTO.setAvatar(fan.getAvatar()+BusinessConstant.OSS_RESIZE_URL_EXTEND);
+                userCardDTO.setUsername(fan.getUsername());
+                userCardDTO.setProfile(fan.getProfile());
+                userCardDTO.setUserId(fan.getId());
+                userCardDTO.setIsFollowTab(false);
+                // 判断我们是否关注该粉丝
+                userCardDTO.setIsFollowFan(false);
+                if(followIds.contains(fan.getId())){
+                    userCardDTO.setIsFollowFan(true);
+                }
+                userCardDTOList.add(userCardDTO);
+            }
+        }
+        return Result.ok(userCardDTOList);
+    }
+
+    @Override
+    public Result<List<UserCardDTO>> follows(Integer pageNum) {
+        LoginUserDTO u = UserHolder.getUser();
+        if(u == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        User user = userMapper.selectById(u.getId());
+        // 获取用户的关注列表
+        Page<Follow> page = new Page<>(pageNum,MessageConstant.ADMIN_PAGE_SIZE);
+        Page<Follow> followPage = followMapper.selectPage(page, new QueryWrapper<Follow>()
+                .eq("user_id", user.getId()));
+        List<Follow> followList = followPage.getRecords();
+        ArrayList<UserCardDTO> userCardDTOList = new ArrayList<>();
+        if(followList.size()>0){
+            ArrayList<Long> followsIds = new ArrayList<>();
+            for (Follow follow : followList) {
+                followsIds.add(follow.getFollowUserId());
+            }
+            List<User> follows = userMapper.selectBatchIds(followsIds);
+            for (User follow : follows) {
+                UserCardDTO userCardDTO = BeanUtil.copyProperties(follow, UserCardDTO.class);
+                userCardDTO.setUserId(follow.getId());
+                userCardDTO.setAvatar(follow.getAvatar()+BusinessConstant.OSS_RESIZE_URL_EXTEND);
+                userCardDTO.setIsFollowTab(true);
+                userCardDTOList.add(userCardDTO);
+            }
+        }
+        return Result.ok(userCardDTOList);
+    }
+
+    @Override
+    public Result<String> getPhone() {
+        LoginUserDTO u = UserHolder.getUser();
+        if(u == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        String phone = userMapper.selectById(u.getId()).getPhone();
+        return Result.ok(phone);
+    }
+
+    @Override
+    public Result follow(Integer followUserId) {
+        LoginUserDTO u = UserHolder.getUser();
+        if(u == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        User followUser = userMapper.selectById(followUserId);
+        if(followUser == null){
+            return Result.fail(MessageConstant.USER_NOT_EXIST);
+        }
+        Long count = followMapper.selectCount(new QueryWrapper<Follow>()
+                .eq("user_id", u.getId())
+                .eq("follow_user_id", followUserId));
+        if(count != 0){
+            return Result.ok(true);
+        }
+        Follow follow = new Follow();
+        follow.setFollowUserId(Long.valueOf(followUserId));
+        follow.setUserId(u.getId());
+        followMapper.insert(follow);
+        return Result.ok(true);
+    }
+
+    @Override
+    public Result unFollow(Integer followUserId) {
+        LoginUserDTO u = UserHolder.getUser();
+        if(u == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+        followMapper.delete(new QueryWrapper<Follow>()
+                .eq("user_id",u.getId())
+                .eq("follow_user_id",followUserId));
+        return Result.ok(false);
+    }
+
+    @Override
+    public Result<List<PostCardVO>> favorites(Integer pageNum) {
+        LoginUserDTO user = UserHolder.getUser();
+        if(user == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
+
+        Page<Favorites> page = new Page<>(pageNum,MessageConstant.ADMIN_PAGE_SIZE);
+        Page<Favorites> favoritesPage = favoritesMapper.selectPage(page, new QueryWrapper<Favorites>()
+                .eq("user_id", user.getId())
+                .orderByDesc("create_time"));
+        List<Favorites> favoritesList = favoritesPage.getRecords();
+        ArrayList<PostCardVO> postCardVOList = new ArrayList<>();
+        if(favoritesList.size()>0){
+            ArrayList<Long> favoritesIds = new ArrayList<>();
+            favoritesList.forEach(f->{
+                favoritesIds.add(f.getPostId());
+            });
+            List<Post> posts = postMapper.selectBatchIds(favoritesIds);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (Post post : posts) {
+                PostCardVO postCardVO = BeanUtil.copyProperties(post, PostCardVO.class);
+                // 格式化时间
+                postCardVO.setLcTime(dateFormat.format(post.getLcTime()));
+                List<String> picUrlList = postCardVO.getPicUrlList();
+                ArrayList<String> newPic = new ArrayList<>();
+                picUrlList.forEach(pic -> {
+                    pic += BusinessConstant.OSS_RESIZE_URL_EXTEND;
+                    newPic.add(pic);
+                });
+                postCardVO.setPicUrlList(newPic);
+                // 收藏夹内统一没有置顶标签
+                postCardVO.setIsTop(false);
+                postCardVOList.add(postCardVO);
+            }
+        }
+        return Result.ok(postCardVOList);
     }
 }
 

@@ -3,10 +3,9 @@ package com.yhp.lxxybackend.controller.user;
 
 import com.sun.xml.internal.bind.v2.TODO;
 import com.yhp.lxxybackend.constant.MessageConstant;
-import com.yhp.lxxybackend.model.dto.PostDTO;
-import com.yhp.lxxybackend.model.dto.Result;
-import com.yhp.lxxybackend.model.dto.UserDTO;
-import com.yhp.lxxybackend.model.dto.UserFormDTO;
+import com.yhp.lxxybackend.model.dto.*;
+import com.yhp.lxxybackend.model.vo.PostCardVO;
+import com.yhp.lxxybackend.model.vo.UserData;
 import com.yhp.lxxybackend.model.vo.UserVO;
 import com.yhp.lxxybackend.service.UserService;
 import io.swagger.annotations.Api;
@@ -17,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController("userUserController")
 @RequestMapping("/user/user")
@@ -68,35 +68,32 @@ public class UserController {
     public Result dynamic(@RequestParam String minTime,
                           @RequestParam(required = false, defaultValue = "0") Integer offset){
         // TODO 获取当前用户主页动态,minTime应该为zset的score，默认是当前前端第一次请求的时间戳，之后后端都会返回给前端
+        // 从Redis获取收件箱
         return Result.ok("获取当前用户主页动态"+minTime+offset);
     }
 
     @GetMapping("/favorites")
     @ApiOperation("获取主页收藏夹")
-    public Result favorites(@RequestParam String pageNum){
-        // TODO 获取主页收藏夹
-        return Result.ok("获取主页收藏夹"+pageNum+ MessageConstant.USER_PAGE_SIZE);
+    public Result<List<PostCardVO>> favorites(@RequestParam Integer pageNum){
+        return userService.favorites(pageNum);
     }
 
     @GetMapping("/fans")
     @ApiOperation("获取主页粉丝列表")
-    public Result fans(@RequestParam String pageNum){
-        // TODO 获取主页粉丝列表
-        return Result.ok("获取主页粉丝列表"+pageNum+MessageConstant.USER_PAGE_SIZE+5);
+    public Result<List<UserCardDTO>> fans(@RequestParam Integer pageNum){
+        return userService.fans(pageNum);
     }
 
     @GetMapping("/follows")
     @ApiOperation("获取主页关注列表")
-    public Result follows(@RequestParam String pageNum){
-        // TODO 获取主页关注列表
-        return  Result.ok("获取主页关注列表"+pageNum+MessageConstant.USER_PAGE_SIZE+5);
+    public Result<List<UserCardDTO>> follows(@RequestParam Integer pageNum){
+        return  userService.follows(pageNum);
     }
 
     @GetMapping("/get-phone")
     @ApiOperation("获取用户手机号")
-    public Result getPhone(){
-        // TODO 获取当前登录用户手机号
-        return Result.ok("获取当前登录用户手机号");
+    public Result<String> getPhone(){
+        return userService.getPhone();
     }
 
     @GetMapping("/other/{userId}")
@@ -109,14 +106,12 @@ public class UserController {
     @PostMapping("/{followUserId}")
     @ApiOperation("关注-前端未完成")
     public Result follow(@PathVariable("followUserId") Integer followUserId){
-        // TODO 关注
-        return Result.ok("关注"+followUserId);
+        return userService.follow(followUserId);
     }
 
     @PostMapping("/un-follow/{followUserId}")
     @ApiOperation("取消关注-前端未完成")
     public Result unFollow(@PathVariable("followUserId") Integer followUserId){
-        // TODO 取消关注
-        return Result.ok("取消关注"+followUserId);
+        return userService.unFollow(followUserId);
     }
 }

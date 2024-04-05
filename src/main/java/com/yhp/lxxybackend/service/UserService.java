@@ -1,10 +1,12 @@
 package com.yhp.lxxybackend.service;
 
 import com.yhp.lxxybackend.model.dto.Result;
+import com.yhp.lxxybackend.model.dto.UserCardDTO;
 import com.yhp.lxxybackend.model.dto.UserDTO;
 import com.yhp.lxxybackend.model.dto.UserFormDTO;
 import com.yhp.lxxybackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yhp.lxxybackend.model.vo.PostCardVO;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
 import com.yhp.lxxybackend.model.vo.UserVO;
 
@@ -85,4 +87,45 @@ public interface UserService extends IService<User> {
      * @return
      */
     Result<UserDTO> edit(UserDTO userDTO);
+
+    /**
+     * 分页查询用户粉丝列表
+     * @param pageNum
+     * @return
+     */
+    Result<List<UserCardDTO>> fans(Integer pageNum);
+
+    /**
+     * 分页查询用户关注列表
+     * @param pageNum
+     * @return
+     */
+    Result<List<UserCardDTO>> follows(Integer pageNum);
+
+    /**
+     * 获取当前用户手机号
+     * @return
+     */
+    Result<String> getPhone();
+
+    /**
+     * 关注用户
+     * @param followUserId
+     * @return
+     */
+    Result follow(Integer followUserId);
+
+    /**
+     * 取消关注
+     * @param followUserId
+     * @return
+     */
+    Result unFollow(Integer followUserId);
+
+    /**
+     * 获取主页收藏夹
+     * @param pageNum
+     * @return
+     */
+    Result<List<PostCardVO>> favorites(Integer pageNum);
 }
