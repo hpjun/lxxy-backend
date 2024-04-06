@@ -128,4 +128,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     Result<List<PostCardVO>> favorites(Integer pageNum);
+
+    /**
+     * 动态获取动态信息
+     * @param minTime
+     * @param offset
+     * @return
+     */
+    Result<List<Object>> dynamic(String minTime, Integer offset);
 }

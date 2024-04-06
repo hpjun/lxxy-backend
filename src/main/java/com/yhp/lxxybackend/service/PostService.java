@@ -72,4 +72,10 @@ public interface PostService extends IService<Post> {
      * @return
      */
     Result unFavorite(Integer postId);
+
+    /**
+     * 主页简单的随机推荐
+     * @return
+     */
+    Result<List<PostCardVO>> random();
 }

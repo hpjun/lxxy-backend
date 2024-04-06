@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -29,9 +30,8 @@ public class PostController {
 
     @GetMapping("/random/next")
     @ApiOperation("主页获得随机帖子")
-    public Result getPostCard(){
-        // TODO 随机推荐算法
-        return Result.ok("主页获得随机帖子");
+    public Result<List<PostCardVO>> getPostCard(){
+        return postService.random();
     }
 
     @GetMapping("/latest")
@@ -62,9 +62,11 @@ public class PostController {
 
     @PostMapping()
     @ApiOperation("发布帖子")
-    public Result publishPost(@RequestBody PostDTO postDTO){
-        // TODO 发布帖子
-        return Result.ok("发布帖子"+postDTO);
+    public Result publishPost(@RequestBody PostDTO postDTO, HttpServletRequest request){
+        String ip = request.getRemoteAddr();
+        // TODO 上线取消，本地测试环境，ip先固定
+        ip = "223.104.151.72";
+        return postService.publish(postDTO,ip);
     }
 
     @PutMapping("/{postId}")
@@ -78,7 +80,7 @@ public class PostController {
     @DeleteMapping("/{postId}")
     @ApiOperation("删除我的帖子-前端未完成")
     public Result delete(@PathVariable("postId") Integer postId){
-        // TODO 删除我的帖子
+        // TODO 删除我的帖子，需要将发件箱内的帖子删除
         return Result.ok("删除我的帖子"+postId);
     }
 }

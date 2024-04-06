@@ -18,11 +18,13 @@ import com.yhp.lxxybackend.model.vo.PostCardVO;
 import com.yhp.lxxybackend.model.vo.PostVO;
 import com.yhp.lxxybackend.service.PostCommentService;
 import com.yhp.lxxybackend.service.PostService;
+import com.yhp.lxxybackend.utils.HotUtils;
 import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import com.yhp.lxxybackend.utils.UserHolder;
 import javafx.geometry.Pos;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -32,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Admin
@@ -54,6 +57,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     StringRedisTemplate stringRedisTemplate;
     @Resource
     FavoritesMapper favoritesMapper;
+    @Resource
+    FollowMapper followMapper;
 
 
     @Override
@@ -135,6 +140,13 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
 
     @Override
     public Result publish(PostDTO postDTO, String ip) {
+
+        // 获取当前登录用户信息，将信息封装到Post中
+        LoginUserDTO user = UserHolder.getUser();
+
+        if(user == null){
+            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+        }
         String postTypeName = postDTO.getPostType();
         String title = postDTO.getTitle();
         String content = postDTO.getContent();
@@ -167,8 +179,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         } catch (Exception e) {
             throw new BusinessException("解析ip出错");
         }
-        // 获取当前登录用户信息，将信息封装到Post中
-        LoginUserDTO user = UserHolder.getUser();
+
         // 将PostDTO拷贝到Post中，再补充其它字段
 //        ip_region, title, content, pic_url_list,
 //        post_type_id, user_id, username, user_avatar
@@ -178,6 +189,16 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         // 向帖子表插入该条数据
         postMapper.insert(post);
 
+        // 将该帖子信息放入该用户粉丝的收件箱中
+        List<Follow> follows = followMapper.selectList(new QueryWrapper<Follow>().eq("follow_user_id", user.getId()));
+        ArrayList<Long> fansIds = new ArrayList<>();
+        follows.forEach(f->{
+            fansIds.add(f.getUserId());
+        });
+        long nowTimeStamp = new Date().getTime();
+        fansIds.forEach(id->{
+            stringRedisTemplate.opsForZSet().add(RedisConstants.USER_INBOX+id,"postId:"+post.getId(),nowTimeStamp);
+        });
         return Result.ok();
     }
 
@@ -222,6 +243,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
 //            example.jpg?x-oss-process=image/resize,m_fill,h_100,w_100/quality,q_80
             List<String> picUrlList = postCardVO.getPicUrlList();
             ArrayList<String> newPic = new ArrayList<>();
+            // 图片压缩
+            postCardVO.setUserAvatar(post.getUserAvatar()+BusinessConstant.OSS_RESIZE_URL_EXTEND);
             picUrlList.forEach(pic -> {
                 pic += BusinessConstant.OSS_RESIZE_URL_EXTEND;
                 newPic.add(pic);
@@ -244,7 +267,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         }
         // 增加浏览量-后续在定时任务中将该帖子的浏览量持久化到数据库，然后删除该key，直到第二次访问继续时创建
         stringRedisTemplate.opsForValue().increment(RedisConstants.POST_VIEW_COUNT + postId);
-
+        // 增加相应的浏览量分数
+        HotUtils.addPostHot(postId,RedisConstants.VIEW_SCORE,favoritesMapper,postMapper,stringRedisTemplate);
 
         // 拷贝post属性到postVO
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -300,7 +324,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         favorites.setPostId(Long.valueOf(postId));
         favorites.setUserId(user.getId());
         favoritesMapper.insert(favorites);
-
+        // 更新帖子分数-收藏
+        HotUtils.addPostHot(postId,RedisConstants.FAVORITE_SCORE,favoritesMapper,postMapper,stringRedisTemplate);
         return Result.ok("收藏成功");
     }
 
@@ -316,8 +341,72 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
                 .eq("user_id", user.getId())
                 .eq("post_id", postId);
         favoritesMapper.delete(favoritesQueryWrapper);
-
+        // 更新帖子分数-取消收藏
+        HotUtils.addPostHot(postId,-RedisConstants.FAVORITE_SCORE,favoritesMapper,postMapper,stringRedisTemplate);
         return Result.ok("已取消收藏");
+    }
+
+    @Override
+    public Result<List<PostCardVO>> random() {
+        // 获得该用户自己的推荐，每登录怎么办
+        LoginUserDTO user = UserHolder.getUser();
+        List<String> removeKey = new ArrayList<>();
+        if(user == null){
+            // 用户没有登录，使用默认的随机推荐
+            // random:default
+            Long defaultSize = stringRedisTemplate.opsForZSet().size(RedisConstants.DEFAULT_RANDOM);
+            if(defaultSize == null || defaultSize < 5){
+                // 默认的推荐集合不足5条，进行拷贝
+                ZSetOperations<String, String> zSetOps = stringRedisTemplate.opsForZSet();
+                Long size = zSetOps.size(RedisConstants.HOT_POST_KEY); // 获取原始 ZSET 的大小
+                if (size != null && size > 0) {
+                    Set<ZSetOperations.TypedTuple<String>> tuples = zSetOps.rangeWithScores(RedisConstants.HOT_POST_KEY, 0, -1);
+                    zSetOps.add(RedisConstants.DEFAULT_RANDOM, tuples); // 批量插入到目标 ZSET 中
+                }
+            }
+            // 从默认推荐表中随机获取5条数据
+            removeKey = stringRedisTemplate.opsForZSet().randomMembers(RedisConstants.DEFAULT_RANDOM, MessageConstant.USER_PAGE_SIZE);
+            removeKey.forEach(r->{
+                stringRedisTemplate.opsForZSet().remove(RedisConstants.DEFAULT_RANDOM,r);
+            });
+        }else{
+            // random:user:
+            Long userSize = stringRedisTemplate.opsForZSet().size(RedisConstants.USER_RANDOM + user.getId());
+            if(userSize == null || userSize < 5){
+                // 用户推荐集合中元素不足5条，进行拷贝
+                ZSetOperations<String, String> zSetOps = stringRedisTemplate.opsForZSet();
+                Long size = zSetOps.size(RedisConstants.HOT_POST_KEY); // 获取原始 ZSET 的大小
+                if (size != null && size > 0) {
+                    Set<ZSetOperations.TypedTuple<String>> tuples = zSetOps.rangeWithScores(RedisConstants.HOT_POST_KEY, 0, -1);
+                    zSetOps.add(RedisConstants.USER_RANDOM+user.getId(), tuples); // 批量插入到目标 ZSET 中
+                }
+            }
+            // 从用户推荐表中随机获取5条数据
+            removeKey = stringRedisTemplate.opsForZSet().randomMembers(RedisConstants.USER_RANDOM+user.getId(), MessageConstant.USER_PAGE_SIZE);
+            removeKey.forEach(r->{
+                stringRedisTemplate.opsForZSet().remove(RedisConstants.USER_RANDOM+user.getId(),r);
+            });
+        }
+        // 查询removeKey中的帖子信息
+        List<Post> posts = postMapper.selectBatchIds(removeKey);
+        ArrayList<PostCardVO> postCardVOList = new ArrayList<>();
+        // 对帖子进行PostCardVO封装
+        for (Post post : posts) {
+            PostCardVO postCardVO = BeanUtil.copyProperties(post, PostCardVO.class);
+//            example.jpg?x-oss-process=image/resize,m_fill,h_100,w_100/quality,q_80
+            List<String> picUrlList = postCardVO.getPicUrlList();
+            // 进行图片压缩
+            postCardVO.setUserAvatar(post.getUserAvatar()+BusinessConstant.OSS_RESIZE_URL_EXTEND);
+            ArrayList<String> newPic = new ArrayList<>();
+            picUrlList.forEach(pic -> {
+                pic += BusinessConstant.OSS_RESIZE_URL_EXTEND;
+                newPic.add(pic);
+            });
+            postCardVO.setPicUrlList(newPic);
+            postCardVOList.add(postCardVO);
+        }
+//        stringRedisTemplate.opsForZSet()
+        return Result.ok(postCardVOList);
     }
 
 

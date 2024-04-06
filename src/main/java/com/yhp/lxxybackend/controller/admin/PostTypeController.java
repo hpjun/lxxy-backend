@@ -33,11 +33,10 @@ public class PostTypeController {
     }
 
 
-    @GetMapping("/all")
-    @ApiOperation("查询所有板块信息")
-    public Result all(){
-        // TODO 查询所有板块信息 List<String>
-        return Result.ok("查询所有板块信息");
+    @GetMapping()
+    @ApiOperation("查询所有板块名称")
+    public Result<List<String>> all(){
+        return postTypeService.all();
     }
 
 

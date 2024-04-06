@@ -42,4 +42,11 @@ public interface PostTypeService extends IService<PostType> {
      * @return
      */
     Result changeStatus(Integer postTypeId);
+
+    /**
+     * 查询所有板块名称
+     * @return
+     */
+    Result<List<String>> all();
+
 }

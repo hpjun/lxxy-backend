@@ -45,7 +45,6 @@ public class ActivityController {
     @GetMapping("/joined")
     @ApiOperation("分页获取我参加的活动")
     public Result<List<ActivityCardVO>> getJoined(@RequestParam Integer offset) {
-        // TODO 感觉可以调用相同的Service，因为权限校验已经由拦截器做完了
         return activityService.getJoined(offset);
     }
 
@@ -71,7 +70,7 @@ public class ActivityController {
     @ApiOperation("创建活动")
     public Result createActivity(@RequestBody ActivityDTO activityDTO) {
         // TODO 创建活动
-        return Result.ok("创建活动" + activityDTO);
+        return activityService.publish(activityDTO);
     }
 
     @GetMapping("/member/{activityId}")

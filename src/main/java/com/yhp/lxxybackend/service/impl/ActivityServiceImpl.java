@@ -7,13 +7,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yhp.lxxybackend.constant.BusinessConstant;
 import com.yhp.lxxybackend.constant.MessageConstant;
+import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.exception.BusinessException;
 import com.yhp.lxxybackend.mapper.ActivityMemberMapper;
+import com.yhp.lxxybackend.mapper.FollowMapper;
 import com.yhp.lxxybackend.model.dto.ActivityDTO;
 import com.yhp.lxxybackend.model.dto.LoginUserDTO;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.entity.Activity;
 import com.yhp.lxxybackend.model.entity.ActivityMember;
+import com.yhp.lxxybackend.model.entity.Follow;
 import com.yhp.lxxybackend.model.entity.PostComment;
 import com.yhp.lxxybackend.model.vo.ActivityCardVO;
 import com.yhp.lxxybackend.model.vo.ActivityVO;
@@ -23,6 +26,7 @@ import com.yhp.lxxybackend.utils.BusinessUtils;
 import com.yhp.lxxybackend.utils.RegexUtils;
 import com.yhp.lxxybackend.utils.UserHolder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,6 +52,10 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
     ActivityMapper activityMapper;
     @Resource
     ActivityMemberMapper activityMemberMapper;
+    @Resource
+    FollowMapper followMapper;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
 
     @Override
     public Result<List<ActivityCardVO>> listActivity(Integer pageNum, String sc, String level) {
@@ -185,8 +193,8 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             return Result.fail(MessageConstant.PHONE_FORMAT);
         }
         // 活动封面为空就置为默认封面
-        if (picUrl.length() == 0) {
-            picUrl = "默认封面";
+        if (StrUtil.isBlank(picUrl)) {
+            activityDTO.setPicUrl("/img/activityCover.jpg");
         }
 
 
@@ -228,6 +236,18 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         activityMember.setUsername(user.getUsername());
         activityMember.setUserAvatar(user.getAvatar());
         activityMemberMapper.insert(activityMember);
+
+        // 将该活动信息放入该用户粉丝的收件箱中
+        List<Follow> follows = followMapper.selectList(new QueryWrapper<Follow>().eq("follow_user_id", user.getId()));
+        ArrayList<Long> fansIds = new ArrayList<>();
+        follows.forEach(f->{
+            fansIds.add(f.getUserId());
+        });
+        long nowTimeStamp = new Date().getTime();
+        fansIds.forEach(id->{
+            stringRedisTemplate.opsForZSet().add(RedisConstants.USER_INBOX+id,"activityId:"+activity.getId(),nowTimeStamp);
+        });
+
         return Result.ok();
     }
 

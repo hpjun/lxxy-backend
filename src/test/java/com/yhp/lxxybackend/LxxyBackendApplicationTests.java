@@ -1,4 +1,5 @@
 package com.yhp.lxxybackend;
+
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.lang.UUID;
@@ -13,12 +14,15 @@ import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.mapper.*;
 import com.yhp.lxxybackend.model.dto.Result;
 import com.yhp.lxxybackend.model.entity.Post;
+import com.yhp.lxxybackend.model.entity.PostComment;
 import com.yhp.lxxybackend.model.entity.PostType;
 import com.yhp.lxxybackend.model.entity.User;
 import com.yhp.lxxybackend.model.vo.CategoryData;
 import com.yhp.lxxybackend.model.vo.UserCardVO;
 import com.yhp.lxxybackend.model.vo.UserRegionData;
+import com.yhp.lxxybackend.service.PostService;
 import com.yhp.lxxybackend.utils.BusinessUtils;
+import com.yhp.lxxybackend.utils.HotUtils;
 import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import org.junit.jupiter.api.Test;
 import org.lionsoul.ip2region.xdb.Searcher;
@@ -36,21 +40,24 @@ import java.util.*;
 @SpringBootTest
 class LxxyBackendApplicationTests {
 
-   @Resource
-   UserMapper userMapper;
-   @Resource
-   ActivityMapper activityMapper;
-   @Resource
-   ActivityMemberMapper activityMemberMapper;
-   @Resource
-   Ip2RegionUtils ip2RegionUtils;
-   @Resource
-   PostTypeMapper postTypeMapper;
-   @Resource
-   PostMapper postMapper;
-
-   @Resource
-   StringRedisTemplate stringRedisTemplate;
+    @Resource
+    UserMapper userMapper;
+    @Resource
+    ActivityMapper activityMapper;
+    @Resource
+    ActivityMemberMapper activityMemberMapper;
+    @Resource
+    Ip2RegionUtils ip2RegionUtils;
+    @Resource
+    PostTypeMapper postTypeMapper;
+    @Resource
+    PostMapper postMapper;
+    @Resource
+    PostCommentMapper postCommentMapper;
+    @Resource
+    FavoritesMapper favoritesMapper;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
 
     @Test
     void contextLoads() {
@@ -118,42 +125,40 @@ class LxxyBackendApplicationTests {
 //        } catch (Exception e) {
 //            throw new RuntimeException(e);
 //        }
+//        Set<String> range = stringRedisTemplate.opsForZSet().reverseRangeByScore(
+//                RedisConstants.USER_INBOX + 1, 0, new Long("1712324958101")
+//                , 0, 5);
+//        range.forEach(System.out::println);
 
-        String minTime = "1712068975000";
-        long time = Long.parseLong(minTime);
-        String postType = "二手交易";
-        Integer offset = 1;
-        QueryWrapper<Post> postQueryWrapper = new QueryWrapper<>();
-        // 将minTime转为Date类型方便查数据库
-        Date date = new Date(time);
-        Long postTypeId = null;
-        if (!("全部".equals(postType))){
-            List<PostType> postTypes = postTypeMapper.selectList(new QueryWrapper<PostType>().eq("status", 1));
-            for (PostType type : postTypes) {
-                if(type.getTypeName().equals(postType)){
-                    postTypeId = type.getId();
-                    postQueryWrapper.eq("post_type_id",postTypeId);
-                    break;
-                }
-            }
-            if(postTypeId == null){
-                System.out.println("请选择正确的板块");
-            }
-        }
-        postQueryWrapper
-                .lt("create_time",date)
-                .orderByDesc("create_time");
-        // 封装分页对象
-        Page<Post> page = new Page<>(offset,MessageConstant.USER_PAGE_SIZE);
-//        List<Post> posts = postMapper.selectList(postQueryWrapper);
-        Page<Post> postPage = postMapper.selectPage(page, postQueryWrapper);
-        List<Post> posts = postPage.getRecords();
-        posts.forEach(System.out::println);
-
+//        QueryWrapper<Post> postQueryWrapper = new QueryWrapper<>();
+//        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+//            postQueryWrapper.gt("create_time", startOfDay)
+//                    .eq("post_type_id", 2);
+//            Long count = postMapper.selectCount(postQueryWrapper);
+//        System.out.println(count);
     }
 
+
     @Test
-    void UUIDTest(){
+    void hotTest() {
+        // 模拟浏览帖子
+//        HotUtils.addPostHot(5,RedisConstants.VIEW_SCORE,favoritesMapper,postMapper,stringRedisTemplate);
+        // 浏览全部帖子
+//        List<Post> posts = postMapper.selectList(null);
+//        posts.forEach(p->{
+//            HotUtils.addPostHot(Math.toIntExact(p.getId()),RedisConstants.VIEW_SCORE,favoritesMapper,postMapper,stringRedisTemplate);
+//        });
+
+//        postService.random();
+//        long size = stringRedisTemplate.opsForZSet().size(RedisConstants.HOT_POST_KEY);
+//        // 如果长度超过500，则删除分数较低的内容
+//        if (size > 10) {
+//            stringRedisTemplate.opsForZSet()
+//                    .removeRange(RedisConstants.HOT_POST_KEY, 0, size - 11);
+//        }
+    }
+    @Test
+    void UUIDTest () {
         Snowflake snowflake = IdUtil.getSnowflake();
         for (int i = 0; i < 1000; i++) {
 //            System.out.println(UUID.randomUUID().toString(true));
@@ -166,72 +171,71 @@ class LxxyBackendApplicationTests {
 //        System.out.println(UUID.randomUUID(true));
     }
 
-    @Test
-    void beanTest(){
+        @Test
+        void beanTest () {
 
-        String sc = "";
-        String ban = "全部";
-        Integer pageNum = 1;
+            String sc = "";
+            String ban = "全部";
+            Integer pageNum = 1;
 
 
-        // 封装查询条件
-        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        Integer isBan;
-        if("正常".equals(ban)){
-            isBan = 0;
-            userQueryWrapper.eq("ban",isBan);
-        }else if("封禁".equals(ban)){
-            isBan = 1;
-            userQueryWrapper.eq("ban",isBan);
-        }else{
-            // 按照全部查询
+            // 封装查询条件
+            QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+            Integer isBan;
+            if ("正常".equals(ban)) {
+                isBan = 0;
+                userQueryWrapper.eq("ban", isBan);
+            } else if ("封禁".equals(ban)) {
+                isBan = 1;
+                userQueryWrapper.eq("ban", isBan);
+            } else {
+                // 按照全部查询
+            }
+            if (!StrUtil.isBlank(sc)) {
+                userQueryWrapper
+                        .and(qw -> qw
+                                .like("username", sc)
+                                .or().like("phone", sc)
+                                .or().like("id", sc));
+            }
+            // 封装分页对象
+            Page<User> page = new Page<>(pageNum, MessageConstant.ADMIN_PAGE_SIZE);
+            // 分页查询
+            Page<User> userPage = userMapper.selectPage(page, userQueryWrapper);
+            List<User> users = userPage.getRecords();
+            ArrayList<UserCardVO> userCardVOS = new ArrayList<>();
+            for (User user : users) {
+                UserCardVO userCardVO = BeanUtil.copyProperties(user, UserCardVO.class);
+                userCardVOS.add(userCardVO);
+            }
         }
-        if(!StrUtil.isBlank(sc)){
-            userQueryWrapper
-                    .and(qw -> qw
-                            .like("username",sc)
-                            .or().like("phone",sc)
-                            .or().like("id",sc));
-        }
-        // 封装分页对象
-        Page<User> page = new Page<>(pageNum, MessageConstant.ADMIN_PAGE_SIZE);
-        // 分页查询
-        Page<User> userPage = userMapper.selectPage(page, userQueryWrapper);
-        List<User> users = userPage.getRecords();
-        ArrayList<UserCardVO> userCardVOS = new ArrayList<>();
-        for (User user : users) {
-            UserCardVO userCardVO = BeanUtil.copyProperties(user, UserCardVO.class);
-            userCardVOS.add(userCardVO);
+
+
+        /**
+         * 批量插入假用户数据
+         */
+        @Test
+        void addUserTest () {
+            User user = new User();
+            // 对密码进行MD5加密
+            user.setPassword(DigestUtils.md5DigestAsHex("123123".getBytes()));
+            // 封装User对象
+            user.setAvatar(BusinessConstant.DEFAULT_USER_AVATAR);
+            user.setProfile(BusinessConstant.DEFAULT_USER_PROFILE);
+            user.setSex(BusinessConstant.DEFAULT_USER_SEX);
+            user.setAddress(BusinessConstant.DEFAULT_USER_ADDRESS);
+
+            String phoneStr = "15112461";
+            String phone;
+            String format = "%03d"; // 格式化为四位数字，不足四位补零
+
+            for (int i = 0; i < 999; i++) {
+                String format1 = String.format(format, i);
+                phone = phoneStr + format1;
+                user.setId(null);
+                user.setPhone(phone);
+                user.setUsername(phone);
+                userMapper.insert(user);
+            }
         }
     }
-
-
-
-    /**
-     * 批量插入假用户数据
-     */
-    @Test
-    void addUserTest(){
-        User user = new User();
-        // 对密码进行MD5加密
-        user.setPassword(DigestUtils.md5DigestAsHex("123123".getBytes()));
-        // 封装User对象
-        user.setAvatar(BusinessConstant.DEFAULT_USER_AVATAR);
-        user.setProfile(BusinessConstant.DEFAULT_USER_PROFILE);
-        user.setSex(BusinessConstant.DEFAULT_USER_SEX);
-        user.setAddress(BusinessConstant.DEFAULT_USER_ADDRESS);
-
-        String phoneStr = "15112461";
-        String phone;
-        String format = "%03d"; // 格式化为四位数字，不足四位补零
-
-        for (int i = 0; i < 999; i++) {
-            String format1 = String.format(format, i);
-            phone = phoneStr + format1;
-            user.setId(null);
-            user.setPhone(phone);
-            user.setUsername(phone);
-            userMapper.insert(user);
-        }
-    }
-}

@@ -11,6 +11,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,7 +27,7 @@ import java.util.*;
 public class test {
 
     @Test
-    void test() {
+    void test() throws ParseException {
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        Date date = new Date();
 //        System.out.println(dateFormat.format(date));
@@ -147,6 +149,11 @@ public class test {
 //                throw new RuntimeException(e);
 //            }
 //        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        Date parse = simpleDateFormat.parse("2022-01-02 12:00:00");
+        System.out.println(parse);
     }
 
 }

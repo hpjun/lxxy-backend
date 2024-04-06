@@ -11,6 +11,7 @@ public class RedisConstants {
     // 日统计的有效期为32天
     public static final long STATISTICS_DAY_TTL = 32L;
 
+    public static final String USER_INBOX = "user:inbox:";
 
 
     public static final String POST_VIEW_COUNT = "statistics:post:viewCount:";
@@ -33,4 +34,12 @@ public class RedisConstants {
     public static final String HOUR_USER_KEY = "statistics:24h:userCount";
     public static final String HOUR_ACTIVITY_KEY = "statistics:24h:activityCount";
     public static final String HOUR_UV_KEY = "statistics:24h:uv:";
+
+
+    public static final String HOT_POST_KEY = "hot:post";
+    public static final String DEFAULT_RANDOM = "random:default";
+    public static final String USER_RANDOM = "random:user:";
+    public static final Double VIEW_SCORE = 0.1;
+    public static final Double COMMENT_SCORE = 20.0;
+    public static final Double FAVORITE_SCORE = 30.0;
 }

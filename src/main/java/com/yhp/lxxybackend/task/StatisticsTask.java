@@ -140,8 +140,16 @@ public class StatisticsTask {
         categoryDataList.add(nullData);
         String activityJoinRate = new Gson().toJson(categoryDataList);
         stringRedisTemplate.opsForValue().set(RedisConstants.ACTIVITY_JOIN_RATE,activityJoinRate);
-    }
 
+        // 每天凌晨检查"hot:post"的长度，如果长度大于1000，则截断之后分数不高的数据
+        // 获取当前热度表的长度
+        long size = stringRedisTemplate.opsForZSet().size(RedisConstants.HOT_POST_KEY);
+        // 如果长度超过500，则删除分数较低的内容
+        if (size > 1000) {
+            stringRedisTemplate.opsForZSet()
+                    .removeRange(RedisConstants.HOT_POST_KEY, 0, size - 1001);
+        }
+    }
 
     /**
      * 每5分钟进行持久化
@@ -163,6 +171,5 @@ public class StatisticsTask {
                 stringRedisTemplate.delete(postKey);
             }
         }
-
     }
 }

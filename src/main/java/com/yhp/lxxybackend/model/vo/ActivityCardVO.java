@@ -24,6 +24,7 @@ public class ActivityCardVO {
     private String endTime;		//结束时间
 
     // user
+    private String type;        //"post"/"activity"
     private String picUrl;		//活动封面
     private Integer totalCount;	//最大人数
     private String createTime;		//创建时间，用来解决动态数据查询问题

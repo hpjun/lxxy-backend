@@ -90,8 +90,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         postTypeQueryWrapper.eq("is_delete", 0)
                 .eq("status", 1);
         List<PostType> postTypes = postTypeMapper.selectList(postTypeQueryWrapper);
-        QueryWrapper<Post> postQueryWrapper = new QueryWrapper<>();
         for (PostType postType : postTypes) {
+            QueryWrapper<Post> postQueryWrapper = new QueryWrapper<>();
             postQueryWrapper.gt("create_time", startOfDay)
                     .eq("post_type_id", postType.getId());
             Long count = postMapper.selectCount(postQueryWrapper);
@@ -99,9 +99,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
         String newPostCount = new Gson().toJson(newPostCountMap);
         // 今日不同难度下的活动数
-        QueryWrapper<Activity> activityQueryWrapper = new QueryWrapper<>();
         HashMap<String, Integer> newActivityCountMap = new HashMap<>();
         for (int i = 0; i < 3; i++) {
+            QueryWrapper<Activity> activityQueryWrapper = new QueryWrapper<>();
             activityQueryWrapper
                     .gt("create_time", startOfDay)
                     .eq("level", i);
@@ -167,7 +167,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 pvuvData.setUV(Math.toIntExact(uv));
                 pvuvData.setPV(Integer.valueOf(pv));
                 String[] split = time.split(":");
-                pvuvData.setDate(split[1]+"-"+split[2]);
+                pvuvData.setDate(split[1] + "-" + split[2]);
                 pvuvDataList.add(pvuvData);
             }
             return Result.ok(pvuvDataList);
@@ -183,7 +183,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 pvuvData.setUV(Math.toIntExact(uv));
                 pvuvData.setPV(Integer.valueOf(pv));
                 String[] split = time.split(":");
-                pvuvData.setDate(split[1]+"-"+split[2]);
+                pvuvData.setDate(split[1] + "-" + split[2]);
                 pvuvDataList.add(pvuvData);
             }
             return Result.ok(pvuvDataList);
@@ -197,16 +197,16 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         ArrayList<UserData> userDataList = new ArrayList<>();
 
-        if("24h".equals(timeSpan)){
+        if ("24h".equals(timeSpan)) {
             List<String> past24Hour = BusinessUtils.getPast24Hour();
             List<String> totalUserCount = stringRedisTemplate.opsForList().range(RedisConstants.HOUR_USER_KEY, 0, -1);
             ArrayList<Integer> newUserCount = new ArrayList<>();
 
             // 获取新增用户数
-            for (int i = 0; i < totalUserCount.size()-1; i++) {
+            for (int i = 0; i < totalUserCount.size() - 1; i++) {
                 Integer todayCount = Integer.valueOf(totalUserCount.get(i));
                 Integer yesterDayCount = Integer.valueOf(totalUserCount.get(i + 1));
-                newUserCount.add(todayCount-yesterDayCount);
+                newUserCount.add(todayCount - yesterDayCount);
             }
             Collections.reverse(newUserCount);
 
@@ -218,14 +218,13 @@ public class StatisticsServiceImpl implements StatisticsService {
             int i = 0;
             for (String time : past24Hour) {
                 UserData userData = new UserData();
-                userData.setDate(time+":00");
+                userData.setDate(time + ":00");
                 userData.setNewCount(newUserCount.get(i));
                 userData.setTotalCount(Integer.valueOf(totalUserCount.get(i++)));
                 userDataList.add(userData);
             }
             return Result.ok(userDataList);
-        }
-        else if("7day".equals(timeSpan)){
+        } else if ("7day".equals(timeSpan)) {
             List<String> past8Days = BusinessUtils.getPastNDays(8);
             ArrayList<Integer> totalUserCount = new ArrayList<>();
             ArrayList<Integer> newUserCount = new ArrayList<>();
@@ -236,28 +235,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 totalUserCount.add(Integer.valueOf(userCount));
             }
 
-            for (int i = 0; i < totalUserCount.size()-1; i++) {
+            for (int i = 0; i < totalUserCount.size() - 1; i++) {
                 Integer todayCount = totalUserCount.get(i);
                 Integer yesterDay = totalUserCount.get(i + 1);
-                newUserCount.add(todayCount-yesterDay);
+                newUserCount.add(todayCount - yesterDay);
             }
             Collections.reverse(newUserCount);
 
-            totalUserCount.remove(totalUserCount.size()-1);
+            totalUserCount.remove(totalUserCount.size() - 1);
             Collections.reverse(totalUserCount);
             Collections.reverse(past8Days);
 
             for (int i = 0; i < 7; i++) {
                 UserData userData = new UserData();
                 String[] split = past8Days.get(i).split(":");
-                userData.setDate(split[1]+"-"+split[2]);
+                userData.setDate(split[1] + "-" + split[2]);
                 userData.setNewCount(newUserCount.get(i));
                 userData.setTotalCount(totalUserCount.get(i));
                 userDataList.add(userData);
             }
             return Result.ok(userDataList);
-        }
-        else if("30day".equals(timeSpan)){
+        } else if ("30day".equals(timeSpan)) {
             List<String> past31Days = BusinessUtils.getPastNDays(31);
             ArrayList<Integer> totalUserCount = new ArrayList<>();
             ArrayList<Integer> newUserCount = new ArrayList<>();
@@ -268,27 +266,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 totalUserCount.add(Integer.valueOf(userCount));
             }
 
-            for (int i = 0; i < totalUserCount.size()-1; i++) {
+            for (int i = 0; i < totalUserCount.size() - 1; i++) {
                 Integer todayCount = totalUserCount.get(i);
                 Integer yesterDay = totalUserCount.get(i + 1);
-                newUserCount.add(todayCount-yesterDay);
+                newUserCount.add(todayCount - yesterDay);
             }
             Collections.reverse(newUserCount);
 
-            totalUserCount.remove(totalUserCount.size()-1);
+            totalUserCount.remove(totalUserCount.size() - 1);
             Collections.reverse(totalUserCount);
             Collections.reverse(past31Days);
 
             for (int i = 0; i < 30; i++) {
                 UserData userData = new UserData();
                 String[] split = past31Days.get(i).split(":");
-                userData.setDate(split[1]+"-"+split[2]);
+                userData.setDate(split[1] + "-" + split[2]);
                 userData.setNewCount(newUserCount.get(i));
                 userData.setTotalCount(totalUserCount.get(i));
                 userDataList.add(userData);
             }
             return Result.ok(userDataList);
-        }else {
+        } else {
             return Result.fail("服务器错误");
         }
     }
@@ -298,16 +296,16 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         ArrayList<ActivityData> activityDataList = new ArrayList<>();
 
-        if("24h".equals(timeSpan)){
+        if ("24h".equals(timeSpan)) {
             List<String> past24Hour = BusinessUtils.getPast24Hour();
             List<String> totalActivityCount = stringRedisTemplate.opsForList().range(RedisConstants.HOUR_ACTIVITY_KEY, 0, -1);
             ArrayList<Integer> newActivityCount = new ArrayList<>();
 
             // 获取新增用户数
-            for (int i = 0; i < totalActivityCount.size()-1; i++) {
+            for (int i = 0; i < totalActivityCount.size() - 1; i++) {
                 Integer todayCount = Integer.valueOf(totalActivityCount.get(i));
                 Integer yesterDayCount = Integer.valueOf(totalActivityCount.get(i + 1));
-                newActivityCount.add(todayCount-yesterDayCount);
+                newActivityCount.add(todayCount - yesterDayCount);
             }
             Collections.reverse(newActivityCount);
 
@@ -319,14 +317,13 @@ public class StatisticsServiceImpl implements StatisticsService {
             int i = 0;
             for (String time : past24Hour) {
                 ActivityData activityData = new ActivityData();
-                activityData.setDate(time+":00");
+                activityData.setDate(time + ":00");
                 activityData.setNewCount(newActivityCount.get(i));
                 activityData.setTotalCount(Integer.valueOf(totalActivityCount.get(i++)));
                 activityDataList.add(activityData);
             }
             return Result.ok(activityDataList);
-        }
-        else if("7day".equals(timeSpan)){
+        } else if ("7day".equals(timeSpan)) {
             List<String> past8Days = BusinessUtils.getPastNDays(8);
             ArrayList<Integer> totalActivityCount = new ArrayList<>();
             ArrayList<Integer> newActivityCount = new ArrayList<>();
@@ -337,28 +334,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 totalActivityCount.add(Integer.valueOf(activityCount));
             }
 
-            for (int i = 0; i < totalActivityCount.size()-1; i++) {
+            for (int i = 0; i < totalActivityCount.size() - 1; i++) {
                 Integer todayCount = totalActivityCount.get(i);
                 Integer yesterDay = totalActivityCount.get(i + 1);
-                newActivityCount.add(todayCount-yesterDay);
+                newActivityCount.add(todayCount - yesterDay);
             }
             Collections.reverse(newActivityCount);
 
-            totalActivityCount.remove(totalActivityCount.size()-1);
+            totalActivityCount.remove(totalActivityCount.size() - 1);
             Collections.reverse(totalActivityCount);
             Collections.reverse(past8Days);
 
             for (int i = 0; i < 7; i++) {
                 ActivityData activityData = new ActivityData();
                 String[] split = past8Days.get(i).split(":");
-                activityData.setDate(split[1]+"-"+split[2]);
+                activityData.setDate(split[1] + "-" + split[2]);
                 activityData.setNewCount(newActivityCount.get(i));
                 activityData.setTotalCount(totalActivityCount.get(i));
                 activityDataList.add(activityData);
             }
             return Result.ok(activityDataList);
-        }
-        else if("30day".equals(timeSpan)){
+        } else if ("30day".equals(timeSpan)) {
             List<String> past31Days = BusinessUtils.getPastNDays(31);
             ArrayList<Integer> totalActivityCount = new ArrayList<>();
             ArrayList<Integer> newActivityCount = new ArrayList<>();
@@ -369,27 +365,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 totalActivityCount.add(Integer.valueOf(activityCount));
             }
 
-            for (int i = 0; i < totalActivityCount.size()-1; i++) {
+            for (int i = 0; i < totalActivityCount.size() - 1; i++) {
                 Integer todayCount = totalActivityCount.get(i);
                 Integer yesterDay = totalActivityCount.get(i + 1);
-                newActivityCount.add(todayCount-yesterDay);
+                newActivityCount.add(todayCount - yesterDay);
             }
             Collections.reverse(newActivityCount);
 
-            totalActivityCount.remove(totalActivityCount.size()-1);
+            totalActivityCount.remove(totalActivityCount.size() - 1);
             Collections.reverse(totalActivityCount);
             Collections.reverse(past31Days);
 
             for (int i = 0; i < 30; i++) {
                 ActivityData activityData = new ActivityData();
                 String[] split = past31Days.get(i).split(":");
-                activityData.setDate(split[1]+"-"+split[2]);
+                activityData.setDate(split[1] + "-" + split[2]);
                 activityData.setNewCount(newActivityCount.get(i));
                 activityData.setTotalCount(totalActivityCount.get(i));
                 activityDataList.add(activityData);
             }
             return Result.ok(activityDataList);
-        }else {
+        } else {
             return Result.fail("服务器错误");
         }
     }
@@ -399,16 +395,16 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         ArrayList<PostData> postDataList = new ArrayList<>();
 
-        if("24h".equals(timeSpan)){
+        if ("24h".equals(timeSpan)) {
             List<String> past24Hour = BusinessUtils.getPast24Hour();
             List<String> totalPostCount = stringRedisTemplate.opsForList().range(RedisConstants.HOUR_POST_KEY, 0, -1);
             ArrayList<Integer> newPostCount = new ArrayList<>();
 
             // 获取新增用户数
-            for (int i = 0; i < totalPostCount.size()-1; i++) {
+            for (int i = 0; i < totalPostCount.size() - 1; i++) {
                 Integer todayCount = Integer.valueOf(totalPostCount.get(i));
                 Integer yesterDayCount = Integer.valueOf(totalPostCount.get(i + 1));
-                newPostCount.add(todayCount-yesterDayCount);
+                newPostCount.add(todayCount - yesterDayCount);
             }
             Collections.reverse(newPostCount);
 
@@ -420,14 +416,13 @@ public class StatisticsServiceImpl implements StatisticsService {
             int i = 0;
             for (String time : past24Hour) {
                 PostData postData = new PostData();
-                postData.setDate(time+":00");
+                postData.setDate(time + ":00");
                 postData.setNewCount(newPostCount.get(i));
                 postData.setTotalCount(Integer.valueOf(totalPostCount.get(i++)));
                 postDataList.add(postData);
             }
             return Result.ok(postDataList);
-        }
-        else if("7day".equals(timeSpan)){
+        } else if ("7day".equals(timeSpan)) {
             List<String> past8Days = BusinessUtils.getPastNDays(8);
             ArrayList<Integer> totalPostCount = new ArrayList<>();
             ArrayList<Integer> newPostCount = new ArrayList<>();
@@ -438,27 +433,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 totalPostCount.add(Integer.valueOf(postCount));
             }
 
-            for (int i = 0; i < totalPostCount.size()-1; i++) {
+            for (int i = 0; i < totalPostCount.size() - 1; i++) {
                 Integer todayCount = totalPostCount.get(i);
                 Integer yesterDay = totalPostCount.get(i + 1);
-                newPostCount.add(todayCount-yesterDay);
+                newPostCount.add(todayCount - yesterDay);
             }
             Collections.reverse(newPostCount);
 
-            totalPostCount.remove(totalPostCount.size()-1);
+            totalPostCount.remove(totalPostCount.size() - 1);
             Collections.reverse(totalPostCount);
             Collections.reverse(past8Days);
 
             for (int i = 0; i < 7; i++) {
                 PostData postData = new PostData();
                 String[] split = past8Days.get(i).split(":");
-                postData.setDate(split[1]+"-"+split[2]);
+                postData.setDate(split[1] + "-" + split[2]);
                 postData.setNewCount(newPostCount.get(i));
                 postData.setTotalCount(totalPostCount.get(i));
                 postDataList.add(postData);
             }
             return Result.ok(postDataList);
-        }else if("30day".equals(timeSpan)){
+        } else if ("30day".equals(timeSpan)) {
             List<String> past8Days = BusinessUtils.getPastNDays(31);
             ArrayList<Integer> totalPostCount = new ArrayList<>();
             ArrayList<Integer> newPostCount = new ArrayList<>();
@@ -469,27 +464,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 totalPostCount.add(Integer.valueOf(postCount));
             }
 
-            for (int i = 0; i < totalPostCount.size()-1; i++) {
+            for (int i = 0; i < totalPostCount.size() - 1; i++) {
                 Integer todayCount = totalPostCount.get(i);
                 Integer yesterDay = totalPostCount.get(i + 1);
-                newPostCount.add(todayCount-yesterDay);
+                newPostCount.add(todayCount - yesterDay);
             }
             Collections.reverse(newPostCount);
 
-            totalPostCount.remove(totalPostCount.size()-1);
+            totalPostCount.remove(totalPostCount.size() - 1);
             Collections.reverse(totalPostCount);
             Collections.reverse(past8Days);
 
             for (int i = 0; i < 30; i++) {
                 PostData postData = new PostData();
                 String[] split = past8Days.get(i).split(":");
-                postData.setDate(split[1]+"-"+split[2]);
+                postData.setDate(split[1] + "-" + split[2]);
                 postData.setNewCount(newPostCount.get(i));
                 postData.setTotalCount(totalPostCount.get(i));
                 postDataList.add(postData);
             }
             return Result.ok(postDataList);
-        }else{
+        } else {
             return Result.fail("服务器错误");
         }
     }
@@ -504,16 +499,16 @@ public class StatisticsServiceImpl implements StatisticsService {
     public Result<List<CategoryData>> activeUserRate() {
         ArrayList<CategoryData> categoryDataList = new ArrayList<>();
         // 获取活跃用户数
-        Set<String> keys = stringRedisTemplate.keys(RedisConstants.LOGIN_USER_KEY+"*");
+        Set<String> keys = stringRedisTemplate.keys(RedisConstants.LOGIN_USER_KEY + "*");
         HashSet<String> activeCount = new HashSet<>();
         assert keys != null;
-        keys.forEach(key->{
+        keys.forEach(key -> {
             String userId = key.split(":")[2].substring(19);
             activeCount.add(userId);
         });
         // 获取总用户数
         Long totalCount = userMapper.selectCount(null);
-        CategoryData activeUser = new CategoryData("活跃用户",activeCount.size());
+        CategoryData activeUser = new CategoryData("活跃用户", activeCount.size());
         CategoryData un = new CategoryData("未活跃用户", (int) (totalCount - activeCount.size()));
         categoryDataList.add(activeUser);
         categoryDataList.add(un);
@@ -525,19 +520,19 @@ public class StatisticsServiceImpl implements StatisticsService {
         ArrayList<CategoryData> categoryDataList = new ArrayList<>();
         QueryWrapper<Activity> activityQueryWrapper = new QueryWrapper<>();
         activityQueryWrapper.groupBy("level")
-                        .select("level","count(*) as count");
+                .select("level", "count(*) as count");
         List<Map<String, Object>> activities = activityMapper.selectMaps(activityQueryWrapper);
         for (Map<String, Object> activity : activities) {
             Integer level = (Integer) activity.get("level");
             String levelName = null;
             Long count = (Long) activity.get("count");
-            if(level == 0){
+            if (level == 0) {
                 levelName = "简单";
             }
-            if(level == 1){
+            if (level == 1) {
                 levelName = "休闲";
             }
-            if(level == 2){
+            if (level == 2) {
                 levelName = "困难";
             }
             CategoryData categoryData = new CategoryData(levelName, Math.toIntExact(count));

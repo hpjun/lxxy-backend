@@ -27,6 +27,7 @@ public class PostCardVO {
 
 
     // user需要的字段
+    private String type;            // "post"/"activity"
     private Integer userId;			//创建的用户id
     private String userAvatar;		//用户头像
     private String lcTime;				//最后评论时间

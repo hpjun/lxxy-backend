@@ -43,7 +43,6 @@ public class ActivityController {
     @PostMapping()
     @ApiOperation("创建活动")
     public Result publish(@RequestBody ActivityDTO activityDTO){
-        // TODO 创建活动，创建的时候自己也要参加该活动
         return activityService.publish(activityDTO);
     }
 

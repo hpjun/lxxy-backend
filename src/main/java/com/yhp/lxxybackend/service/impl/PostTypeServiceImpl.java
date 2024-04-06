@@ -98,6 +98,17 @@ public class PostTypeServiceImpl extends ServiceImpl<PostTypeMapper, PostType>
             return Result.ok(true);
         }
     }
+
+    @Override
+    public Result<List<String>> all() {
+        List<PostType> postTypes = postTypeMapper.selectList(new QueryWrapper<PostType>()
+                .eq("status", 1));
+        ArrayList<String> postTypeNames = new ArrayList<>();
+        postTypes.forEach(p->{
+            postTypeNames.add(p.getTypeName());
+        });
+        return Result.ok(postTypeNames);
+    }
 }
 
 

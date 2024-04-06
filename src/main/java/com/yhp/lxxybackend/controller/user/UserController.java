@@ -65,11 +65,11 @@ public class UserController {
 
     @GetMapping("/dynamic")
     @ApiOperation("获取主页动态-前端未完成")
-    public Result dynamic(@RequestParam String minTime,
-                          @RequestParam(required = false, defaultValue = "0") Integer offset){
+    public Result<List<Object>> dynamic(@RequestParam String minTime,
+                          @RequestParam Integer offset){
         // TODO 获取当前用户主页动态,minTime应该为zset的score，默认是当前前端第一次请求的时间戳，之后后端都会返回给前端
-        // 从Redis获取收件箱
-        return Result.ok("获取当前用户主页动态"+minTime+offset);
+        // 从Redis获取该用户的收件箱
+        return userService.dynamic(minTime,offset);
     }
 
     @GetMapping("/favorites")

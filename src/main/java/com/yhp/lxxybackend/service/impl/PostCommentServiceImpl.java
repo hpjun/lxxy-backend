@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yhp.lxxybackend.constant.MessageConstant;
+import com.yhp.lxxybackend.constant.RedisConstants;
 import com.yhp.lxxybackend.exception.BusinessException;
+import com.yhp.lxxybackend.mapper.FavoritesMapper;
 import com.yhp.lxxybackend.mapper.PostMapper;
 import com.yhp.lxxybackend.model.dto.CommentDTO;
 import com.yhp.lxxybackend.model.dto.LoginUserDTO;
@@ -15,9 +17,11 @@ import com.yhp.lxxybackend.model.entity.PostComment;
 import com.yhp.lxxybackend.model.vo.CommentVO;
 import com.yhp.lxxybackend.service.PostCommentService;
 import com.yhp.lxxybackend.mapper.PostCommentMapper;
+import com.yhp.lxxybackend.utils.HotUtils;
 import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import com.yhp.lxxybackend.utils.UserHolder;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,6 +45,10 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
     Ip2RegionUtils ip2RegionUtils;
     @Resource
     PostMapper postMapper;
+    @Resource
+    FavoritesMapper favoritesMapper;
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
 
     @Override
     public Result<List<CommentVO>> getPostComment(
@@ -82,7 +90,7 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
             return Result.fail("请先登录");
         }
         Post post = postMapper.selectById(postId);
-        if(post == null){
+        if (post == null) {
             return Result.fail(MessageConstant.POST_NOT_EXIST);
         }
 
@@ -104,9 +112,13 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
         }
 
         postCommentMapper.insert(postComment);
-        post.setCommentCount(post.getCommentCount()+1);
+        // 帖子评论数+1和更新lc时间
+        post.setCommentCount(post.getCommentCount() + 1);
         post.setLcTime(new Date());
         postMapper.updateById(post);
+
+        // 评论完成之后就要更新分数
+        HotUtils.addPostHot(postId, RedisConstants.COMMENT_SCORE, favoritesMapper, postMapper, stringRedisTemplate);
         return Result.ok("发布成功");
     }
 }
