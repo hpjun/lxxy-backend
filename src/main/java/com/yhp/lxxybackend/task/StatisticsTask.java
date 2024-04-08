@@ -117,6 +117,7 @@ public class StatisticsTask {
         List<Map<String, Object>> maps1 = maps.subList(0, 10);
         for (Map<String, Object> map : maps1) {
             String address = (String) map.get("address");
+            address = address.split("-")[0];
             Long value = (Long) map.get("value");
             UserRegionData userRegionData = new UserRegionData();
             userRegionData.setRegion(address);

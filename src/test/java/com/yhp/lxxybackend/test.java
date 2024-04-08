@@ -150,10 +150,11 @@ public class test {
 //            }
 //        }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//
+//        Date parse = simpleDateFormat.parse("2022-01-02 12:00:00");
+//        System.out.println(parse);
 
-        Date parse = simpleDateFormat.parse("2022-01-02 12:00:00");
-        System.out.println(parse);
     }
 
 }

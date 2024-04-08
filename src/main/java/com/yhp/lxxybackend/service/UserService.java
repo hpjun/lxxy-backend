@@ -93,14 +93,14 @@ public interface UserService extends IService<User> {
      * @param pageNum
      * @return
      */
-    Result<List<UserCardDTO>> fans(Integer pageNum);
+    Result<List<UserCardDTO>> fans(Integer pageNum,Long userId);
 
     /**
      * 分页查询用户关注列表
      * @param pageNum
      * @return
      */
-    Result<List<UserCardDTO>> follows(Integer pageNum);
+    Result<List<UserCardDTO>> follows(Integer pageNum,Long userId);
 
     /**
      * 获取当前用户手机号
@@ -135,5 +135,14 @@ public interface UserService extends IService<User> {
      * @param offset
      * @return
      */
-    Result<List<Object>> dynamic(String minTime, Integer offset);
+    Result<List<Object>> dynamic(String minTime, Integer offset, Long userId);
+
+    /**
+     * 查看别人信息
+     * @param userId
+     * @return
+     */
+    Result<UserVO> otherUserInfo(Integer userId);
+
+
 }

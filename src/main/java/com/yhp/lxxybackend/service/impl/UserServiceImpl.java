@@ -321,6 +321,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (u == null) {
             return Result.fail(MessageConstant.USER_NOT_LOGIN);
         }
+
+
         User user = userMapper.selectById(u.getId());
         UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
 
@@ -435,12 +437,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public Result<List<UserCardDTO>> fans(Integer pageNum) {
-        LoginUserDTO u = UserHolder.getUser();
-        if (u == null) {
-            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+    public Result<List<UserCardDTO>> fans(Integer pageNum, Long userId) {
+
+        if (userId == null) {
+            LoginUserDTO u = UserHolder.getUser();
+            if (u == null) {
+                return Result.fail(MessageConstant.USER_NOT_LOGIN);
+            }
+            userId = u.getId();
         }
-        User user = userMapper.selectById(u.getId());
+
+        User user = userMapper.selectById(userId);
         // 查看该用户的粉丝列表
         Page<Follow> page = new Page<>(pageNum, MessageConstant.ADMIN_PAGE_SIZE);
         Page<Follow> followPage = followMapper.selectPage(page, new QueryWrapper<Follow>()
@@ -468,9 +475,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 userCardDTO.setUserId(fan.getId());
                 userCardDTO.setIsFollowTab(false);
                 // 判断我们是否关注该粉丝
-                userCardDTO.setIsFollowFan(false);
+                userCardDTO.setIsFollow(false);
                 if (followIds.contains(fan.getId())) {
-                    userCardDTO.setIsFollowFan(true);
+                    userCardDTO.setIsFollow(true);
                 }
                 userCardDTOList.add(userCardDTO);
             }
@@ -479,12 +486,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public Result<List<UserCardDTO>> follows(Integer pageNum) {
-        LoginUserDTO u = UserHolder.getUser();
-        if (u == null) {
-            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+    public Result<List<UserCardDTO>> follows(Integer pageNum, Long userId) {
+        if (userId == null) {
+            LoginUserDTO u = UserHolder.getUser();
+            if (u == null) {
+                return Result.fail(MessageConstant.USER_NOT_LOGIN);
+            }
+            userId = u.getId();
         }
-        User user = userMapper.selectById(u.getId());
+
+        User user = userMapper.selectById(userId);
         // 获取用户的关注列表
         Page<Follow> page = new Page<>(pageNum, MessageConstant.ADMIN_PAGE_SIZE);
         Page<Follow> followPage = followMapper.selectPage(page, new QueryWrapper<Follow>()
@@ -548,7 +559,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             stringRedisTemplate.opsForZSet().add(RedisConstants.USER_INBOX + u.getId(), "postId:" + p.getId(), p.getCreateTime().getTime());
         });
         activities.forEach(a -> {
-            stringRedisTemplate.opsForZSet().add(RedisConstants.USER_INBOX+u.getId(),"activityId:"+a.getId(),a.getCreateTime().getTime());
+            stringRedisTemplate.opsForZSet().add(RedisConstants.USER_INBOX + u.getId(), "activityId:" + a.getId(), a.getCreateTime().getTime());
         });
         return Result.ok(true);
     }
@@ -566,11 +577,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 将关注用户的发布的帖子和活动id信息从当前用户的收件箱中删除
         List<Post> posts = postMapper.selectList(new QueryWrapper<Post>().eq("user_id", followUserId));
         List<Activity> activities = activityMapper.selectList(new QueryWrapper<Activity>().eq("user_id", followUserId));
-        posts.forEach(p->{
-            stringRedisTemplate.opsForZSet().remove(RedisConstants.USER_INBOX+u.getId(),"postId:"+p.getId());
+        posts.forEach(p -> {
+            stringRedisTemplate.opsForZSet().remove(RedisConstants.USER_INBOX + u.getId(), "postId:" + p.getId());
         });
-        activities.forEach(a->{
-            stringRedisTemplate.opsForZSet().remove(RedisConstants.USER_INBOX+u.getId(),"activityId:"+a.getId());
+        activities.forEach(a -> {
+            stringRedisTemplate.opsForZSet().remove(RedisConstants.USER_INBOX + u.getId(), "activityId:" + a.getId());
         });
         return Result.ok(false);
     }
@@ -615,26 +626,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public Result<List<Object>> dynamic(String minTime, Integer offset) {
+    public Result<List<Object>> dynamic(String minTime, Integer offset, Long userId) {
 
         long time = Long.parseLong(minTime);
-        // 查询用户信息
-        LoginUserDTO user = UserHolder.getUser();
+        if (userId == null) {
+            // 查询用户信息
+            LoginUserDTO u = UserHolder.getUser();
+            if (u == null) {
+                return Result.fail(MessageConstant.USER_NOT_LOGIN);
+            }
+            userId = u.getId();
+        }
+
         Set<String> range = stringRedisTemplate.opsForZSet().reverseRangeByScore(
-                RedisConstants.USER_INBOX + user.getId(), 0, time
-                , (offset-1)* 5L, 5);
+                RedisConstants.USER_INBOX + userId, 0, time
+                , (offset - 1) * 5L, 5);
 
         ArrayList<Object> list = new ArrayList<>();
-        if(range == null){
+        if (range == null) {
             return Result.ok(list);
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        range.forEach(r->{
+        range.forEach(r -> {
             String[] split = r.split(":");
-            if("postId".equals(split[0])){
+            if ("postId".equals(split[0])) {
                 Post post = postMapper.selectById(split[1]);
-                if(post != null){
+                if (post != null) {
                     PostCardVO postCardVO = BeanUtil.copyProperties(post, PostCardVO.class);
                     postCardVO.setType("post");
                     // 格式化时间
@@ -649,9 +667,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                     postCardVO.setIsTop(false);
                     list.add(postCardVO);
                 }
-            }else{
+            } else {
                 Activity activity = activityMapper.selectById(split[1]);
-                if(activity != null){
+                if (activity != null) {
                     ActivityCardVO activityCardVO = BeanUtil.copyProperties(activity, ActivityCardVO.class);
                     activityCardVO.setType("activity");
                     // 进行图片压缩
@@ -665,6 +683,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         });
         return Result.ok(list);
     }
+
+    @Override
+    public Result<UserVO> otherUserInfo(Integer userId) {
+
+        User user = userMapper.selectById(userId);
+        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
+
+        //  查询当前用户是否关注
+        userVO.setIsFollow(false);
+        LoginUserDTO u = UserHolder.getUser();
+        if(u != null){
+            Long count = followMapper.selectCount(new QueryWrapper<Follow>()
+                    .eq("user_id", u.getId())
+                    .eq("follow_user_id", userId));
+            if(count != 0){
+                userVO.setIsFollow(true);
+            }
+        }
+
+        // 获取关注人数
+        Long followsCount = followMapper.selectCount(new QueryWrapper<Follow>().eq("user_id", user.getId()));
+        // 和粉丝人数
+        Long fansCount = followMapper.selectCount(new QueryWrapper<Follow>().eq("follow_user_id", user.getId()));
+
+        userVO.setFollowsCount(Math.toIntExact(followsCount));
+        userVO.setFansCount(Math.toIntExact(fansCount));
+        userVO.setAvatar(user.getAvatar() + BusinessConstant.OSS_RESIZE_URL_EXTEND);
+        return Result.ok(userVO);
+
+    }
+
+
 }
 
 

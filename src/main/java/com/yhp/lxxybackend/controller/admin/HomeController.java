@@ -36,6 +36,6 @@ public class HomeController {
     @GetMapping("/is-login")
     @ApiOperation("验证是否登录")
     public Result isLogin(){
-        return Result.ok();
+        return Result.ok(123123);
     }
 }

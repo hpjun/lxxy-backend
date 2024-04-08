@@ -13,6 +13,6 @@ public class UserCardDTO {
     private String username;		//用户名
     private String avatar;		//用户头像
     private String profile;		//简介
-    private Boolean isFollowFan;		//是否关注粉丝，就是回关
+    private Boolean isFollow;		//是否关注粉丝，就是回关
     private Boolean isFollowTab;        //当前是否是关注接口
 }

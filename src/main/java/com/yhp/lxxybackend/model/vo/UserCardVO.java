@@ -19,6 +19,6 @@ public class UserCardVO {
 
     // user
     private String profile;			//个人简介
-    private Boolean isFollowFan;		//有没有关注该粉丝，粉丝列表的东西
+    private Boolean isFollow;		//有没有关注该粉丝，粉丝列表的东西
     private Boolean isFollowTab;		//是不是关注列表，若为true，上面字段就无关紧要了
 }

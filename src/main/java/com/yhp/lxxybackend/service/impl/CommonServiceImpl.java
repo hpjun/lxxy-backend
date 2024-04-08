@@ -44,7 +44,6 @@ public class CommonServiceImpl implements CommonService {
     public Result<String> upload(MultipartFile file) {
         log.info("文件上传：{}", file);
         try {
-            //TODO 对上传的文件做类型判断、压缩、转格式、确认大小符合要求之后才上传
             //原始文件名
             String originalFilename = file.getOriginalFilename();
             String extend = originalFilename.substring(originalFilename.lastIndexOf('.') + 1).toLowerCase();
