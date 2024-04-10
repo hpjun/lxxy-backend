@@ -71,7 +71,6 @@ public class PostController {
     @PutMapping("/top/{postId}")
     @ApiOperation("置顶/取消置顶")
     public Result changeTop(@PathVariable("postId") Integer postId){
-        // TODO 置顶/取消置顶
         return postService.changeTop(postId);
     }
 

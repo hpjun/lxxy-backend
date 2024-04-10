@@ -177,7 +177,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
             String[] split = ipAddress.split("\\|");
             post.setIpRegion(split[2]);
         } catch (Exception e) {
-            throw new BusinessException("解析ip出错");
+            post.setIpRegion("未知");
         }
 
         // 将PostDTO拷贝到Post中，再补充其它字段
@@ -252,9 +252,6 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
             postCardVO.setPicUrlList(newPic);
             postCardVOList.add(postCardVO);
         }
-//        id title content viewCount commentCount isTop lcTime
-//        userName userAvatar picUrlList
-
         return Result.ok(postCardVOList);
     }
 

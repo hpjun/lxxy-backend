@@ -194,7 +194,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         } else {
             stringRedisTemplate.opsForHash().putAll(tokenKey, userMap);
             stringRedisTemplate.expire(tokenKey, RedisConstants.LOGIN_USER_TTL, TimeUnit.DAYS);
-
         }
         return Result.ok(token);
     }
@@ -299,18 +298,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public Result changeStatus(Integer userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
-            return Result.fail(MessageConstant.USER_NOT_LOGIN);
+            return Result.fail(MessageConstant.USER_NOT_EXIST);
         }
         Integer ban = user.getBan();
+        List<Post> posts = postMapper.selectList(new QueryWrapper<Post>().eq("user_id", userId));
+        List<Activity> activities = activityMapper.selectList(new QueryWrapper<Activity>().eq("user_id", userId));
         if (ban == 0) {
-            // 被ban
+            // 被ban，将其帖子、活动都设为不可见
             user.setBan(1);
             userMapper.updateById(user);
+            posts.forEach(p->{
+                p.setIsShow(0);
+                postMapper.updateById(p);
+            });
+            activities.forEach(a->{
+                a.setIsShow(0);
+                activityMapper.updateById(a);
+            });
             return Result.ok(true);
         } else {
-            // 解封
+            // 解封，将其帖子、活动都设为可见
             user.setBan(0);
             userMapper.updateById(user);
+            posts.forEach(p->{
+                p.setIsShow(1);
+                postMapper.updateById(p);
+            });
+            activities.forEach(a->{
+                a.setIsShow(1);
+                activityMapper.updateById(a);
+            });
             return Result.ok(false);
         }
     }

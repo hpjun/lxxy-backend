@@ -133,7 +133,7 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             return Result.fail("活动不存在，删除失败");
         }
         for (Integer id : ids) {
-            // 删除帖子
+            // 删除活动
             activityMapper.deleteById(id);
             // 删除活动成员
             activityMemberMapper.delete(new QueryWrapper<ActivityMember>()

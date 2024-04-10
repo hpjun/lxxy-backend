@@ -108,7 +108,7 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
             String[] split = ipAddress.split("\\|");
             postComment.setIpRegion(split[2]);
         } catch (Exception e) {
-            throw new BusinessException("解析ip出错");
+            postComment.setIpRegion("未知");
         }
 
         postCommentMapper.insert(postComment);
