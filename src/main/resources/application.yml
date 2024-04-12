@@ -66,6 +66,8 @@ knife4j:
   openapi:
     title: "lxxy接口文档"
     version: 1.0
+    concat: 'hpjun'
+    description: '大学生骑行社区'
     group:
       user:
         group-name: 用户端接口
