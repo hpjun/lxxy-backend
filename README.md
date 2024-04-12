@@ -8,11 +8,11 @@
 
 用户端
 
-<img src="./doc/assets/user.png" alt="用户界面" />
+<img src="./doc/assets/user.PNG" alt="用户界面" />
 
 管理端
 
-![管理员界面](.\doc\assets\admin.PNG)
+![管理员界面](./doc/assets/admin.PNG)
 
 
 
@@ -23,7 +23,7 @@
 3. 执行`lxxy.sql`文件，创建库表
 4. 启动项目，在浏览器中输入`localhost:8080/doc.html`，可以看到接口文档界面
 
-![knife4j](.\doc\assets\knife4j.PNG)
+![knife4j](./doc/assets/knife4j.PNG)
 
 
 
