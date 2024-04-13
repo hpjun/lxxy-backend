@@ -10,6 +10,8 @@ public class RedisConstants {
     public static final long LOGIN_ADMIN_TTL = 1L;
     // 日统计的有效期为32天
     public static final long STATISTICS_DAY_TTL = 32L;
+    // 用户推荐列表有效期1
+    public static final long RANDOM_TTL = 1L;
 
     public static final String USER_INBOX = "user:inbox:";
 

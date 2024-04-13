@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Admin
@@ -376,6 +377,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
                 if (size != null && size > 0) {
                     Set<ZSetOperations.TypedTuple<String>> tuples = zSetOps.rangeWithScores(RedisConstants.HOT_POST_KEY, 0, -1);
                     zSetOps.add(RedisConstants.USER_RANDOM+user.getId(), tuples); // 批量插入到目标 ZSET 中
+                    // 设置过期时间，保证数据更新。
+                    stringRedisTemplate.expire(RedisConstants.USER_RANDOM+user.getId(),RedisConstants.RANDOM_TTL, TimeUnit.DAYS);
                 }
             }
             // 从用户推荐表中随机获取5条数据
