@@ -176,7 +176,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String token = IdUtil.getSnowflake().nextIdStr();
         Long id = users.get(0).getId();
         token = token + id;
-        assert users != null;
         LoginUserDTO loginUserDTO = BeanUtil.copyProperties(users.get(0), LoginUserDTO.class);
         loginUserDTO.setToken(token);
         // beanTOMap!!

@@ -20,6 +20,7 @@ import com.yhp.lxxybackend.mapper.PostCommentMapper;
 import com.yhp.lxxybackend.utils.HotUtils;
 import com.yhp.lxxybackend.utils.Ip2RegionUtils;
 import com.yhp.lxxybackend.utils.UserHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import java.util.List;
  * @createDate 2024-03-27 17:22:54
  */
 @Service
+@Slf4j
 public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostComment>
         implements PostCommentService {
 
@@ -108,6 +110,7 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
             String[] split = ipAddress.split("\\|");
             postComment.setIpRegion(split[2]);
         } catch (Exception e) {
+            log.info("评论，出现ip属地查询异常:{}",ip);
             postComment.setIpRegion("未知");
         }
 

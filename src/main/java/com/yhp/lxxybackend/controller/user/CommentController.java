@@ -42,8 +42,15 @@ public class CommentController {
     public Result writeComment(@PathVariable("postId") Integer postId,
                                @RequestParam String commentStr,
                                HttpServletRequest request){
-        String ip = request.getRemoteAddr();
-        // TODO 上线取消，本地测试环境，ip先固定
+
+        String ip = request.getHeader("X-Forwarded-For");
+        log.info("代理链:{}",ip);
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            log.info("代理链为空");
+            ip = request.getHeader("X-Real-IP");
+        }
+
+        // 上线取消，本地测试环境，ip先固定
         ip = "223.104.151.72";
         return postCommentService.writeComment(postId,commentStr,ip);
     }

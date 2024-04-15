@@ -75,6 +75,8 @@ public class MvcConfig implements WebMvcConfigurer {
         return new CorsFilter(configSource);
     }
 
+
+
     @Bean
     @ConditionalOnMissingBean
     public Ip2RegionUtils getSearcher() {

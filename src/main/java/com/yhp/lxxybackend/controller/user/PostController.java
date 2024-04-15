@@ -30,57 +30,60 @@ public class PostController {
 
     @GetMapping("/random/next")
     @ApiOperation("主页获得随机帖子")
-    public Result<List<PostCardVO>> getPostCard(){
+    public Result<List<PostCardVO>> getPostCard() {
         return postService.random();
     }
 
     @GetMapping("/latest")
     @ApiOperation("分类获取帖子")
     public Result<List<PostCardVO>> getPostByType(@RequestParam String postType,
-                          @RequestParam String minTime,
-                          @RequestParam Integer offset){
-        return postService.getPostByType(postType,minTime,offset);
+                                                  @RequestParam String minTime,
+                                                  @RequestParam Integer offset) {
+        return postService.getPostByType(postType, minTime, offset);
     }
 
     @GetMapping("/{postId}")
     @ApiOperation("获取帖子详情")
-    public Result<PostVO> postDetail(@PathVariable("postId") Integer postId){
+    public Result<PostVO> postDetail(@PathVariable("postId") Integer postId) {
         return postService.postDetail(postId);
     }
 
     @PostMapping("/favorite/{postId}")
     @ApiOperation("收藏帖子")
-    public Result favorite(@PathVariable("postId") Integer postId){
+    public Result favorite(@PathVariable("postId") Integer postId) {
         return postService.favorite(postId);
     }
 
     @PostMapping("/un-favorite/{postId}")
     @ApiOperation("取消收藏帖子")
-    public Result unFavorite(@PathVariable("postId") Integer postId){
+    public Result unFavorite(@PathVariable("postId") Integer postId) {
         return postService.unFavorite(postId);
     }
 
     @PostMapping()
     @ApiOperation("发布帖子")
-    public Result publishPost(@RequestBody PostDTO postDTO, HttpServletRequest request){
-        String ip = request.getRemoteAddr();
-        // TODO 上线取消，本地测试环境，ip先固定
-        ip = "223.104.151.72";
-        return postService.publish(postDTO,ip);
+    public Result publishPost(@RequestBody PostDTO postDTO, HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        // 上线取消，本地测试环境，ip先固定
+//        ip = "223.104.151.72";
+        return postService.publish(postDTO, ip);
     }
 
     @PutMapping("/{postId}")
     @ApiOperation("我的帖子编辑-前端未完成")
     public Result edit(@PathVariable("postId") Integer postId,
-                       @RequestBody PostDTO postDTO){
+                       @RequestBody PostDTO postDTO) {
         // TODO 我的帖子编辑
-        return Result.ok("我的帖子编辑"+postId+postDTO);
+        return Result.ok("我的帖子编辑" + postId + postDTO);
     }
 
     @DeleteMapping("/{postId}")
     @ApiOperation("删除我的帖子-前端未完成")
-    public Result delete(@PathVariable("postId") Integer postId){
+    public Result delete(@PathVariable("postId") Integer postId) {
         // TODO 删除我的帖子，需要将发件箱内的帖子删除
-        return Result.ok("删除我的帖子"+postId);
+        return Result.ok("删除我的帖子" + postId);
     }
 }
