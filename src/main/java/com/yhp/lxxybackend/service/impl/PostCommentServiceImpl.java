@@ -109,8 +109,15 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
             String ipAddress = searcher.search(ip);    //中国|0|江苏省|泰州市|移动
             String[] split = ipAddress.split("\\|");
             postComment.setIpRegion(split[2]);
+            if(!"中国".equals(split[0])){
+                postComment.setIpRegion(split[0]);
+                if("0".equals(split[0])){
+                    postComment.setIpRegion("未知");
+                }
+            }
         } catch (Exception e) {
             log.info("评论，出现ip属地查询异常:{}",ip);
+            log.error("出错原因：{}",e);
             postComment.setIpRegion("未知");
         }
 

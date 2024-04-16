@@ -6,10 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.Scanner;
 
 /**
@@ -33,10 +30,22 @@ public class Ip2RegionUtils {
             // 要么就创建一个临时文件
             ClassPathResource resource = new ClassPathResource("ip2region.xdb");
             InputStream inputStream = resource.getInputStream();
-            byte[] cBuff = new byte[inputStream.available()];
-            inputStream.read(cBuff);
+            // 不知道为什么，打包之后就不能正确的从输入流到byte数组，开发环境没问题
+//            byte[] cBuff = new byte[inputStream.available()];
+//            inputStream.read(cBuff);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096]; // 缓冲区大小，根据需要调整
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+            byte[] cBuff = baos.toByteArray();
+
+
             this.searcher = Searcher.newWithBuffer(cBuff);
             log.info("加载ip2region.xdb资源成功");
+            log.info("字节长度：{}",String.valueOf(cBuff.length));
         } catch (IOException e) {
             log.error("加载ip2region.xdb资源失败: {}", e.getMessage());
         } catch (Exception e){

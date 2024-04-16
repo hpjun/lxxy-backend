@@ -48,8 +48,10 @@ public class PostController {
     @ApiOperation("发布帖子")
     public Result publish(@RequestBody PostDTO postDTO, HttpServletRequest request){
         String ip = request.getHeader("x-forwarded-for");
+        log.info("x-forwarded-for：{}",ip);
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("X-Real-IP");
+            log.info("X-Real-IP：{}",ip);
         }
         // 上线取消，本地测试环境，ip先固定
 //        ip = "223.104.151.72";

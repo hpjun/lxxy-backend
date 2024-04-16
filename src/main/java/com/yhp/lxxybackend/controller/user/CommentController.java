@@ -42,16 +42,17 @@ public class CommentController {
     public Result writeComment(@PathVariable("postId") Integer postId,
                                @RequestParam String commentStr,
                                HttpServletRequest request){
-
-        String ip = request.getHeader("X-Forwarded-For");
-        log.info("代理链:{}",ip);
+        String ip = request.getHeader("x-forwarded-for");
+        log.info("x-forwarded-for：{}",ip);
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            log.info("代理链为空");
             ip = request.getHeader("X-Real-IP");
+            log.info("X-Real-IP：{}",ip);
         }
-
         // 上线取消，本地测试环境，ip先固定
-        ip = "223.104.151.72";
+//        ip = "223.104.151.72";
+//        ip = "13.250.35.57";
+//        ip = "abc";
+
         return postCommentService.writeComment(postId,commentStr,ip);
     }
 

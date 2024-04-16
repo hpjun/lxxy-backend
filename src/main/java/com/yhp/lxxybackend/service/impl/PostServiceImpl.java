@@ -176,7 +176,14 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
             Searcher searcher = ip2RegionUtils.getSearcher();
             String ipAddress = searcher.search(ip);    //中国|0|江苏省|泰州市|移动
             String[] split = ipAddress.split("\\|");
+
             post.setIpRegion(split[2]);
+            if(!"中国".equals(split[0])){
+                post.setIpRegion(split[0]);
+                if("0".equals(split[0])){
+                    post.setIpRegion("未知");
+                }
+            }
         } catch (Exception e) {
             post.setIpRegion("未知");
         }
